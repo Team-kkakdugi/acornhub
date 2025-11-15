@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -73,8 +74,26 @@ func handleProjects(w http.ResponseWriter, r *http.Request) {
 		}
 
 	} else if r.Method == "GET" {
-		// list projects for the authenticated user
-		rows, err := db.Query("SELECT id, projectname, projectdesc, user_id FROM projects WHERE user_id = ?", userID)
+		searchQuery := r.URL.Query().Get("q")
+
+		var rows *sql.Rows
+		var err error
+
+		if searchQuery != "" {
+			// 검색어가 있는 경우: 공백 제거 및 소문자 변환 후 LIKE 검색
+			searchTerm := strings.ToLower(strings.ReplaceAll(searchQuery, " ", ""))
+			query := `
+				SELECT id, projectname, projectdesc, user_id 
+				FROM projects 
+				WHERE user_id = ? AND LOWER(REPLACE(projectname, ' ', '')) LIKE ?
+			`
+			rows, err = db.Query(query, userID, "%"+searchTerm+"%")
+		} else {
+			// 검색어가 없는 경우: 모든 프로젝트 조회
+			query := "SELECT id, projectname, projectdesc, user_id FROM projects WHERE user_id = ?"
+			rows, err = db.Query(query, userID)
+		}
+
 		if err != nil {
 			http.Error(w, "프로젝트 목록 조회 실패", http.StatusInternalServerError)
 			return
@@ -84,17 +103,10 @@ func handleProjects(w http.ResponseWriter, r *http.Request) {
 		var list []Project
 		for rows.Next() {
 			var p Project
-			var id int64
-			var name, desc string
-			var uid int64
-			if err := rows.Scan(&id, &name, &desc, &uid); err != nil {
+			if err := rows.Scan(&p.Projectid, &p.Name, &p.Desc, &p.Userid); err != nil {
 				http.Error(w, "DB 스캔 실패", http.StatusInternalServerError)
 				return
 			}
-			p.Projectid = id
-			p.Name = name
-			p.Desc = desc
-			p.Userid = uid
 			list = append(list, p)
 		}
 

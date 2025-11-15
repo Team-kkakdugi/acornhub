@@ -42,9 +42,13 @@
 	</div>
 
 	<div class="box" id="projectsBox">
-		<strong>프로젝트 관리</strong>
+		<strong>프로젝트 관리 및 검색</strong>
+		<div style="margin-top:8px; display: flex; gap: 8px; align-items: center;">
+			<input id="projectSearchInput" placeholder="프로젝트 이름 검색..." style="flex-grow: 1;">
+			<button id="projectSearchBtn">검색</button>
+		</div>
 		<div style="margin-top:8px">
-			<button id="loadProjectsBtn">프로젝트 목록 불러오기</button>
+			<button id="loadAllProjectsBtn">전체 목록 보기</button>
 		</div>
 		<div id="projectsList" style="margin-top:12px">(목록 없음)</div>
 		<div id="editArea" style="display:none;margin-top:12px">
@@ -146,16 +150,23 @@
 		})
 
 		// --- 프로젝트 관리 ---
-		async function loadProjects(){
-			show('프로젝트 목록을 불러오는 중...')
+		async function loadProjects(searchQuery = ''){
+			const msg = searchQuery ? `'${searchQuery}' 검색 중...` : '프로젝트 목록을 불러오는 중...'
+			show(msg)
+			
+			let url = '/api/projects/'
+			if(searchQuery){
+				url += '?q=' + encodeURIComponent(searchQuery)
+			}
+
 			try{
-				const res = await fetch('/api/projects/', {method:'GET', credentials:'same-origin'})
+				const res = await fetch(url, {method:'GET', credentials:'same-origin'})
 				const text = await res.text()
 				let list = []
 				try{ list = JSON.parse(text) } catch(e){ show('목록 파싱 실패: '+e+'\n'+text); return }
 				const container = document.getElementById('projectsList')
 				container.innerHTML = ''
-				if(!Array.isArray(list) || list.length===0){ container.innerText='(생성된 프로젝트 없음)'; show('HTTP '+res.status); return }
+				if(!Array.isArray(list) || list.length===0){ container.innerText='(결과 없음)'; show('HTTP '+res.status); return }
 				
 				list.forEach(p=>{
 					const id = p.projectid
@@ -174,7 +185,7 @@
 					const btnShowCards = document.createElement('button'); btnShowCards.textContent='카드 보기';
 					btnShowCards.addEventListener('click', ()=> {
 						document.getElementById('cardsBox').style.display = 'block'
-						document.getElementById('cardsBoxTitle').textContent = '\''.concat(escapeHtml(name), '프로젝트 카드 관리')
+						document.getElementById('cardsBoxTitle').textContent = `'${escapeHtml(name)}' 프로젝트 카드 관리`
 						document.getElementById('createCardProjectId').value = id
 						loadCards(id)
 					})
@@ -208,7 +219,12 @@
 			}catch(err){ show('삭제 실패: '+err) }
 		}
 
-		document.getElementById('loadProjectsBtn').addEventListener('click', loadProjects)
+		document.getElementById('loadAllProjectsBtn').addEventListener('click', () => loadProjects())
+		document.getElementById('projectSearchBtn').addEventListener('click', () => {
+			const query = document.getElementById('projectSearchInput').value
+			loadProjects(query)
+		})
+
 		document.getElementById('saveEditBtn').addEventListener('click', async ()=>{
 			const id = document.getElementById('editId').value.trim()
 			if(!id){ show('id가 비어있습니다'); return }
