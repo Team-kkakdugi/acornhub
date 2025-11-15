@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <title>Acorn Hub - 대시보드</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
     <link rel="stylesheet" href="css/dashboard.css" />
   </head>
   <body>
@@ -23,18 +24,38 @@
         </div>
 
         <div class="sidebar-section">
-          <div class="sidebar-section-title">건우 님의 Acorns</div>
-          <button class="sidebar-item" type="button">
+          <div class="sidebar-section-title">
+            <span id="user-name-label"></span> 님의 <span class="acorns-highlight">Acorns</span>
+          </div>
+          <button class="sidebar-item" type="button" id="sidebar-search-btn">
             <span class="sidebar-item-bullet">●</span>
             <span class="sidebar-item-label">프로젝트 검색</span>
           </button>
         </div>
 
+        <!-- 개인 페이지 텍스트 제거, 새 페이지 추가만 + 아이콘 -->
         <div class="sidebar-section">
-          <div class="sidebar-section-title">개인 페이지</div>
-          <button class="sidebar-item sidebar-item-add" type="button">
-            <span class="sidebar-item-plus">▢</span>
+          <button
+            class="sidebar-item sidebar-item-add"
+            type="button"
+            id="add-page-btn"
+          >
+            <img
+              src="assets/page-add.png"
+              alt="새 페이지 아이콘"
+              class="sidebar-page-icon"
+            />
             <span class="sidebar-item-label">새 페이지 추가</span>
+          </button>
+
+          <!-- 여기 아래에 프로젝트 이름들 표시 -->
+          <div class="sidebar-project-list" id="sidebar-project-list"></div>
+        </div>
+
+        <!-- 사이드바 맨 아래 꽉 찬 로그아웃 -->
+        <div class="sidebar-bottom">
+          <button class="sidebar-logout-btn" id="logout-btn" type="button">
+            로그아웃
           </button>
         </div>
       </aside>
@@ -43,17 +64,17 @@
       <main class="main">
         <header class="topbar">
           <div class="topbar-title">
-            <!-- 대시보드 아이콘 이미지 -->
-            <img
-              src="assets/dashboard.png"
-              alt="대시보드 아이콘"
-              class="topbar-icon-image"
-            />
-            <span>데시보드</span>
+            <span>대시보드</span>
           </div>
-          <button class="btn btn-logout" id="logout-btn" type="button">
-            로그아웃
-          </button>
+
+          <!-- 상단 검색창 -->
+          <div class="topbar-search">
+            <input
+              type="text"
+              id="project-search-input"
+              placeholder="프로젝트 검색..."
+            />
+          </div>
         </header>
 
         <section class="content">
@@ -65,11 +86,8 @@
               id="add-folder-card"
               type="button"
             >
-              <img
-                src="assets/folder-add.png"
-                alt="새 폴더 추가"
-                class="folder-image"
-              />
+              <span class="folder-add-text">새 프로젝트</span>
+              <div class="folder-add-icon">+</div>
             </button>
 
             <!-- 처음에는 비어 있는 폴더 리스트 -->

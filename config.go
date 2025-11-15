@@ -84,5 +84,21 @@ func setupDatabase() error {
 		return err
 	}
 
+	createDocumentsTableSQL := `
+	CREATE TABLE IF NOT EXISTS documents (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		title TEXT NOT NULL,
+		content TEXT,
+		project_id INTEGER NOT NULL,
+		user_id INTEGER NOT NULL,
+		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+		updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+		FOREIGN KEY (project_id) REFERENCES projects (id),
+		FOREIGN KEY (user_id) REFERENCES users (id)
+	);`
+	if _, err := db.Exec(createDocumentsTableSQL); err != nil {
+		return err
+	}
+
 	return nil
 }

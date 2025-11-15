@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Acorn Hub - 프로젝트</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="css/project.css" />
+  </head>
+  <body>
+    <div class="project-layout">
+      <!-- 메인 영역 -->
+      <main class="main-content">
+        <header class="main-header">
+          <a href="/dashboard.html" class="back-to-dashboard">
+            &larr; 대시보드로 돌아가기
+          </a>
+          <h1 id="project-name">프로젝트 이름</h1>
+        </header>
+        <section class="card-grid" id="card-grid">
+          <!-- js/project.js 에서 동적으로 채워질 영역 -->
+        </section>
+      </main>
+
+      <!-- 사이드바 -->
+      <aside class="sidebar">
+        <div class="sidebar-content">
+          <div id="document-list-container">
+            <div class="document-list-header">
+              <h2 class="document-list-title">문서 목록</h2>
+              <button class="btn-text" id="add-document-btn" title="새 문서 만들기">
+                새 문서 +
+              </button>
+            </div>
+            <ul class="document-list" id="document-list">
+              <!-- js/project.js 에서 동적으로 채워질 영역 -->
+            </ul>
+          </div>
+          <div id="document-detail-container" style="display: none;">
+            <!-- js/project.js 에서 동적으로 채워질 영역 -->
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <!-- 카드 전체 내용 보기 모달 -->
+    <div id="card-modal" class="modal-container" style="display: none;">
+      <div class="modal-overlay"></div>
+      <div class="modal-content">
+        <button class="modal-close-btn">&times;</button>
+        <p id="modal-card-text"></p>
+      </div>
+    </div>
+
+    <script src="js/project.js"></script>
+  </body>
+</html>

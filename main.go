@@ -62,6 +62,7 @@ func main() {
 	http.HandleFunc("/api/me", authMiddleware(handleMe))
 	http.HandleFunc("/api/projects/", authMiddleware(handleProjects))
 	http.HandleFunc("/api/cards/", authMiddleware(handleCards))
+	http.HandleFunc("/api/documents/", authMiddleware(handleDocuments))
 
 	// 정적 파일 서버 설정
 	// 위에서 등록된 API 경로 외의 모든 요청은 static 디렉토리의 파일을 제공합니다.

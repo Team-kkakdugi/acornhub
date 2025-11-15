@@ -4,8 +4,8 @@
 
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    sans-serif;
+  font-family: 'Pretendard Variable', 'Apple SD Gothic Neo', 'Noto Sans KR', 
+    -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   background-color: #f7f7f7;
   color: #222;
 }
@@ -50,7 +50,7 @@ body {
 }
 
 .logo-text {
-  font-size: 0.95rem;
+  font-size: 1.2rem;
   font-weight: 600;
 }
 
@@ -59,9 +59,15 @@ body {
 }
 
 .sidebar-section-title {
-  font-size: 0.8rem;
+  font-size: 1rem;
   color: #6b7280;
   margin-bottom: 6px;
+}
+
+/* Acorns 텍스트 강조용 스타일 추가 */
+.sidebar-section-title .acorns-highlight {
+  color: #A08060;
+  font-weight: 700;
 }
 
 .sidebar-item {
@@ -73,7 +79,7 @@ body {
   border-radius: 4px;
   background: transparent;
   border: none;
-  font-size: 0.82rem;
+  font-size: 0.95rem;
   color: #374151;
   cursor: pointer;
   text-align: left;
@@ -88,13 +94,67 @@ body {
   color: #16a34a;
 }
 
-.sidebar-item-plus {
-  font-size: 0.7rem;
-  color: #22c55e;
-}
-
 .sidebar-item-add {
   color: #15803d;
+}
+
+/* 새 페이지 추가 버튼 왼쪽 아이콘 */
+
+.sidebar-page-icon {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
+/* 새 페이지 추가 아래 프로젝트 이름 리스트 */
+
+.sidebar-project-list {
+  margin-top: 4px;
+  margin-left: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.92rem;
+}
+
+.sidebar-project-item {
+  padding: 2px 0;
+  border: none;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  color: #4b5563;
+}
+
+.sidebar-project-item:hover {
+  text-decoration: underline;
+}
+
+/* 사이드바 맨 아래 로그아웃 */
+
+.sidebar-bottom {
+  margin-top: auto;
+  padding: 8px 4px 0;
+}
+
+.sidebar-logout-btn {
+  width: 100%;
+  padding: 10px 0;
+  border-radius: 8px;
+  border: none;
+  background: #A08060;
+  color: #FEFEFE;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(139, 111, 71, 0.15);
+}
+
+.sidebar-logout-btn:hover {
+  background: #8B6F47;
+  box-shadow: 0 4px 10px rgba(139, 111, 71, 0.25);
+  transform: translateY(-1px);
 }
 
 /* 메인 영역 */
@@ -109,7 +169,7 @@ body {
 /* 상단 바 */
 
 .topbar {
-  height: 56px;
+  height: 64px;
   border-bottom: 1px solid #e5e5e5;
   padding: 0 24px;
   display: flex;
@@ -121,35 +181,28 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 0.95rem;
+  font-size: 1.1rem;
+  font-weight: 700;
 }
 
-/* 대시보드 텍스트 옆 아이콘 */
+/* 상단 검색창 */
 
-.topbar-icon-image {
-  width: 22px;
-  height: 22px;
-  border-radius: 4px;
-  object-fit: cover;
+.topbar-search {
+  display: flex;
+  align-items: center;
 }
 
-/* 버튼 */
-
-.btn {
-  padding: 7px 16px;
+.topbar-search input {
   border-radius: 999px;
-  border: none;
-  font-size: 0.78rem;
-  cursor: pointer;
+  border: 1px solid #d1d5db;
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  min-width: 250px;
 }
 
-.btn-logout {
-  background: #a0713a;
-  color: #fffdf6;
-}
-
-.btn-logout:hover {
-  background: #8b5d2b;
+.topbar-search input:focus {
+  outline: none;
+  border-color: #a0713a;
 }
 
 /* 콘텐츠 영역 */
@@ -167,73 +220,131 @@ body {
   gap: 24px;
 }
 
-/* folder-add 버튼은 왼쪽 상단에만 하나 */
+/* 새 폴더 추가 버튼 - CSS로 폴더 모양 만들기 */
 
 .folder-add-button {
-  background: transparent;
+  background: rgba(235, 216, 179, 1);
   border: none;
   padding: 0;
   cursor: pointer;
   align-self: flex-start;
+  width: 200px;
+  height: 160px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  position: relative;
+  box-shadow: 0 2px 8px rgba(139, 111, 71, 0.15);
+  transition: all 0.3s ease;
+}
+
+.folder-add-button:hover {
+  box-shadow: 0 6px 16px rgba(139, 111, 71, 0.25);
+  transform: translateY(-4px);
+}
+
+.folder-add-text {
+  font-size: 1.1rem;
+  color: #8B6F47;
+  font-weight: 600;
+}
+
+.folder-add-icon {
+  font-size: 3rem;
+  color: #8B6F47;
+  font-weight: 300;
+  line-height: 1;
 }
 
 /* 폴더들이 생기는 영역 (아래 줄) */
 
 .folder-list {
   display: flex;
-  flex-wrap: wrap; /* 가로로 나가다가 줄바꿈 */
-  gap: 32px;
+  flex-wrap: wrap;
+  gap: 40px;
 }
 
 /* 폴더 카드 */
 
 .folder-card {
-  position: relative; /* 삭제 버튼 위치 기준 */
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   background: transparent;
   border: none;
   cursor: pointer;
+  padding: 0;
 }
 
+/* 폴더 이미지를 CSS로 만들기 */
 .folder-image {
-  width: 120px;
-  height: auto;
-  object-fit: contain;
-  display: block;
+  width: 200px;
+  height: 160px;
+  background: linear-gradient(to bottom, rgba(235, 216, 179, 1) 0%, rgba(235, 216, 179, 1) 75%, #A08060 75%, #A08060 100%);
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(139, 111, 71, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 120px; /* 상단 75% 영역만큼 밀어내기 (160px * 0.75 = 120px) */
+  transition: all 0.3s ease;
+  position: relative;
 }
 
-.folder-card:hover .folder-image,
-.folder-add-button:hover .folder-image {
-  filter: brightness(0.85);
+.folder-card:hover .folder-image {
+  box-shadow: 0 6px 16px rgba(139, 111, 71, 0.25);
+  transform: translateY(-4px);
 }
 
+/* 폴더 이름 - 갈색 부분 안에 배치 */
 .folder-name {
-  margin-top: 8px;
-  font-size: 0.86rem;
+  font-size: 0.95rem;
+  color: #FEFEFE;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
+  font-weight: 700;
 }
 
 /* 삭제 버튼 (X) */
 
 .folder-delete-button {
   position: absolute;
-  top: -4px;
-  right: -4px;
-  width: 18px;
-  height: 18px;
+  top: 8px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
   border-radius: 999px;
   border: none;
-  background: rgba(0, 0, 0, 0.72);
+  background: rgba(0, 0, 0, 0.6);
   color: #fff;
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1;
   padding: 0;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.folder-card:hover .folder-delete-button {
+  opacity: 1;
 }
 
 .folder-delete-button:hover {
-  background: rgba(0, 0, 0, 0.9);
+  background: #d94848;
+  transform: scale(1.15);
+  box-shadow: 0 3px 8px rgba(217, 72, 72, 0.4);
 }
 
 /* 반응형 */

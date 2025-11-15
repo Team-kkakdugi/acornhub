@@ -1,0 +1,350 @@
+/* project.css (Cleaned) */
+:root {
+  --bg-color: #fdfcfa;
+  --sidebar-bg: #f5f1ee;
+  --border-color: #e5e0da;
+  --text-color: #4d423a;
+  --text-light: #8c7b70;
+  --accent-color: #8c6239;
+  --accent-hover: #7a5430;
+  --accent-green: #5a7d60;
+  --accent-green-light: #eef2ef;
+  --card-bg: #ffffff;
+  --card-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+body,
+html {
+  margin: 0;
+  padding: 0;
+  font-family: "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, "Helvetica Neue", Arial, sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
+
+.project-layout {
+  display: flex;
+  height: 100vh;
+}
+
+/* Main Content */
+.main-content {
+  flex: 1;
+  padding: 2rem 3rem;
+  overflow-y: auto;
+}
+
+.main-header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+}
+
+#project-name {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.back-to-dashboard {
+  text-decoration: none;
+  color: var(--accent-color);
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+.back-to-dashboard:hover {
+  text-decoration: underline;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  height: 220px; /* 고정 높이 설정 */
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: var(--card-shadow);
+  transition: box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out;
+}
+.card:not(.card-add) {
+  cursor: pointer;
+}
+.card:not(.card-add):hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-3px);
+}
+
+.card-tags {
+  margin-bottom: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.card-tag {
+  display: inline-block;
+  background-color: #f4eee9;
+  color: var(--accent-color);
+  padding: 0.3rem 0.8rem;
+  border-radius: 16px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.card-text {
+  flex-grow: 1; /* 남은 공간을 모두 차지하도록 설정 */
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--text-light);
+  overflow: hidden; /* 내용이 넘칠 경우 숨김 */
+  text-overflow: ellipsis; /* ... 효과 */
+  
+  /* 여러 줄 줄임표 (웹킷 브라우저용) */
+  display: -webkit-box;
+  -webkit-line-clamp: 4; /* 보여줄 줄 수 */
+  -webkit-box-orient: vertical;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 45%;
+  max-width: 700px;
+  min-width: 400px;
+  background-color: var(--sidebar-bg);
+  border-left: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem;
+  box-sizing: border-box;
+}
+
+.sidebar-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.document-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  flex-shrink: 0;
+}
+
+.document-list-title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.btn-text {
+  background-color: var(--accent-green);
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: white;
+  font-weight: 600;
+  transition: background-color 0.2s;
+}
+.btn-text:hover {
+  background-color: #4a6b50;
+}
+
+#document-list-container {
+  flex-grow: 1;
+  overflow-y: auto;
+}
+
+.document-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.document-list-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.85rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+.document-list-item:hover {
+  background-color: var(--accent-green-light);
+  border-color: #dce5dd;
+}
+
+.document-title {
+  flex-grow: 1;
+  color: var(--text-light);
+}
+.document-list-item:hover .document-title {
+  color: var(--accent-green);
+}
+
+.btn-delete-doc {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: none;
+  background-color: #e5e0da;
+  color: var(--text-light);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0.6;
+  flex-shrink: 0;
+  transition: opacity 0.2s, background-color 0.2s;
+}
+.document-list-item:hover .btn-delete-doc {
+  opacity: 1;
+}
+.btn-delete-doc:hover {
+  background-color: #d94848;
+  color: white;
+}
+
+/* Document Detail View in Sidebar */
+#document-detail-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.document-detail-header {
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+  flex-shrink: 0;
+}
+/* Back to list button style */
+.document-detail-header .btn-text {
+  background-color: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+}
+.document-detail-header .btn-text:hover {
+  background-color: #ede8e4;
+  border-color: #d8d5d3;
+}
+
+.document-content {
+  flex-grow: 1;
+  overflow-y: auto;
+  line-height: 1.7;
+}
+.document-content h2 {
+  margin-top: 0;
+  font-size: 1.8rem;
+  color: var(--text-color);
+}
+.document-content p {
+  color: var(--text-light);
+}
+
+/* Add Card Button Styles */
+.card.card-add {
+  grid-column: 1 / -1; /* Span full width */
+  flex-direction: row; /* Horizontal layout */
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  border-style: dashed;
+  border-width: 2px;
+  border-color: #d4cdc5;
+  background-color: transparent;
+  box-shadow: none;
+  cursor: pointer;
+  padding: 1rem; /* Reduced padding */
+  min-height: auto; /* Remove fixed height */
+  height: auto; /* Override fixed height */
+}
+.card.card-add:hover {
+  transform: none;
+  background-color: var(--sidebar-bg);
+  border-color: var(--accent-color);
+}
+.card-icon-add {
+  font-size: 1.2rem; /* Smaller plus icon */
+  color: var(--text-light);
+  margin-bottom: 0; /* Remove margin */
+  margin-right: 0.5rem; /* Add spacing to the right */
+}
+.card-add:hover .card-icon-add {
+  color: var(--accent-color);
+}
+.card-add .card-name {
+  font-weight: 500;
+  color: var(--text-light);
+}
+.card-add:hover .card-name {
+  color: var(--accent-color);
+}
+
+/* Modal Styles */
+.modal-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.modal-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+}
+.modal-content {
+  position: relative;
+  background: white;
+  padding: 2.5rem;
+  border-radius: 12px;
+  max-width: 600px;
+  width: 90%;
+  z-index: 1001;
+  line-height: 1.7;
+}
+.modal-close-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: transparent;
+  border: none;
+  font-size: 1.8rem;
+  color: #aaa;
+  cursor: pointer;
+}
+.modal-close-btn:hover {
+  color: #333;
+}
+#modal-card-text {
+  margin: 0;
+  white-space: pre-wrap; /* Preserve line breaks */
+  word-wrap: break-word;
+}

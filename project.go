@@ -74,6 +74,34 @@ func handleProjects(w http.ResponseWriter, r *http.Request) {
 		}
 
 	} else if r.Method == "GET" {
+		if idFromPath != "" {
+			// GET /api/projects/{id} - 특정 프로젝트 조회
+			projectID, err := strconv.ParseInt(idFromPath, 10, 64)
+			if err != nil {
+				http.Error(w, "잘못된 id 경로", http.StatusBadRequest)
+				return
+			}
+
+			var p Project
+			query := "SELECT id, projectname, projectdesc, user_id FROM projects WHERE id = ? AND user_id = ?"
+			err = db.QueryRow(query, projectID, userID).Scan(&p.Projectid, &p.Name, &p.Desc, &p.Userid)
+			if err != nil {
+				if err == sql.ErrNoRows {
+					http.Error(w, "프로젝트를 찾을 수 없거나 권한이 없습니다", http.StatusNotFound)
+				} else {
+					http.Error(w, "DB 조회 실패", http.StatusInternalServerError)
+				}
+				return
+			}
+
+			w.Header().Set("Content-Type", "application/json")
+			if err := json.NewEncoder(w).Encode(p); err != nil {
+				http.Error(w, "응답 인코딩 실패", http.StatusInternalServerError)
+			}
+			return
+		}
+
+		// 기존의 모든 프로젝트 조회 또는 검색 로직
 		searchQuery := r.URL.Query().Get("q")
 
 		var rows *sql.Rows
