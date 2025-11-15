@@ -325,24 +325,24 @@ async function handleCreateProject() {
   }
 
   // 두 번째 입력: 프로젝트 주제
-  let topic = prompt("프로젝트의 주제를 적어주세요.");
-  console.log("입력받은 주제:", topic);
+  let desc = prompt("프로젝트의 설명을 적어주세요.");
+  console.log("입력받은 설명:", desc);
   
-  if (topic === null) {
+  if (desc === null) {
     console.log("취소됨");
     return;
   }
   
-  topic = topic.trim();
-  if (!topic) {
-    console.log("주제가 빈 문자열");
-    alert("프로젝트 주제를 입력해주세요.");
+  desc = desc.trim();
+  if (!desc) {
+    console.log("설명이 빈 문자열");
+    alert("프로젝트 설명을 입력해주세요.");
     return;
   }
 
   console.log("=== fetch 요청 보내기 시작 ===");
   console.log("URL:", PROJECT_LIST_URL);
-  console.log("Body:", JSON.stringify({ projectname: name, topic: topic }));
+  console.log("Body:", JSON.stringify({ projectname: name, projectdesc: desc }));
 
   try {
     const res = await fetch(PROJECT_LIST_URL, {
@@ -353,7 +353,7 @@ async function handleCreateProject() {
       },
       body: JSON.stringify({ 
         projectname: name,
-        topic: topic 
+        projectdesc: desc 
       }),
     });
 

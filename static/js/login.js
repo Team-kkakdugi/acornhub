@@ -2,7 +2,7 @@
 const API_BASE_URL = "https://oli.tailda0655.ts.net";
 
 // GitHub 로그인 시작 주소
-const GITHUB_LOGIN_URL = `${API_BASE_URL}/auth/github/`;
+const GITHUB_LOGIN_URL = `${API_BASE_URL}/auth/github`;
 
 // 현재 로그인 사용자 정보 확인
 const ME_URL = `${API_BASE_URL}/api/me/`;

@@ -436,17 +436,7 @@ html {
   white-space: pre-wrap;
   word-wrap: break-word;
 }
-.project-description {
-  margin-bottom: 2rem;
-  padding: 1.5rem;
-  background-color: #f9f9f9;
-  border-radius: 8px;
-  color: #333;
-  font-size: 1rem;
-  line-height: 1.6;
-}
 
-/* 실수로 삭제된 버튼 스타일 복구 */
 .btn-text {
   background-color: var(--accent-green);
   border: none;

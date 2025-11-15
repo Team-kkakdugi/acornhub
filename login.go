@@ -168,5 +168,5 @@ func handleGitHubCallback(w http.ResponseWriter, r *http.Request) {
 		Path:     "/",  // 사이트 전체에서 쿠키 사용
 	})
 
-	http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+	http.Redirect(w, r, "/dashboard.html", http.StatusTemporaryRedirect)
 }

@@ -95,7 +95,6 @@ func setupDatabase() error {
 	if err != nil {
 		return err
 	}
-	defer rows.Close()
 
 	var categoryColumnExists bool
 	for rows.Next() {
@@ -113,6 +112,8 @@ func setupDatabase() error {
 			break
 		}
 	}
+
+	rows.Close()
 
 	if !categoryColumnExists {
 		fmt.Println("기존 cards 테이블에 'category' 컬럼이 없어 추가합니다...")
