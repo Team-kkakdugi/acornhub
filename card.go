@@ -14,6 +14,7 @@ type Card struct {
 	Text      string `json:"cardtext"`
 	URL       string `json:"cardurl"`
 	Tags      string `json:"cardtags"`
+	Category  string `json:"category,omitempty"` // 클러스터링을 위한 카테고리 필드
 	ProjectID int64  `json:"project_id"`
 	UserID    int64  `json:"user_id,omitempty"` // 서버에서 채우므로 클라이언트 요청에는 불필요
 }
@@ -60,6 +61,7 @@ func createCard(w http.ResponseWriter, r *http.Request, userID int64) {
 		return
 	}
 	card.UserID = userID
+	card.Category = "미분류" // 기본 카테고리 설정
 
 	// 사용자가 해당 프로젝트의 소유자인지 확인
 	var projectOwnerID int64
@@ -93,8 +95,8 @@ func createCard(w http.ResponseWriter, r *http.Request, userID int64) {
 	}
 
 	result, err := db.Exec(
-		"INSERT INTO cards (cardtext, cardurl, cardtags, project_id, user_id) VALUES (?, ?, ?, ?, ?)",
-		card.Text, card.URL, card.Tags, card.ProjectID, card.UserID,
+		"INSERT INTO cards (cardtext, cardurl, cardtags, category, project_id, user_id) VALUES (?, ?, ?, ?, ?, ?)",
+		card.Text, card.URL, card.Tags, card.Category, card.ProjectID, card.UserID,
 	)
 	if err != nil {
 		http.Error(w, "카드 생성 실패: "+err.Error(), http.StatusInternalServerError)
@@ -133,7 +135,7 @@ func getCardsByProject(w http.ResponseWriter, r *http.Request, userID int64) {
 		return
 	}
 
-	rows, err := db.Query("SELECT id, cardtext, cardurl, cardtags, project_id, user_id FROM cards WHERE project_id = ? AND user_id = ?", projectID, userID)
+	rows, err := db.Query("SELECT id, cardtext, cardurl, cardtags, category, project_id, user_id FROM cards WHERE project_id = ? AND user_id = ?", projectID, userID)
 	if err != nil {
 		http.Error(w, "카드 목록 조회 실패", http.StatusInternalServerError)
 		return
@@ -143,7 +145,7 @@ func getCardsByProject(w http.ResponseWriter, r *http.Request, userID int64) {
 	var cards []Card
 	for rows.Next() {
 		var c Card
-		if err := rows.Scan(&c.CardID, &c.Text, &c.URL, &c.Tags, &c.ProjectID, &c.UserID); err != nil {
+		if err := rows.Scan(&c.CardID, &c.Text, &c.URL, &c.Tags, &c.Category, &c.ProjectID, &c.UserID); err != nil {
 			http.Error(w, "DB 스캔 실패", http.StatusInternalServerError)
 			return
 		}
@@ -162,7 +164,7 @@ func getCard(w http.ResponseWriter, r *http.Request, userID int64, idFromPath st
 	}
 
 	var card Card
-	err = db.QueryRow("SELECT id, cardtext, cardurl, cardtags, project_id, user_id FROM cards WHERE id = ? AND user_id = ?", cardID, userID).Scan(&card.CardID, &card.Text, &card.URL, &card.Tags, &card.ProjectID, &card.UserID)
+	err = db.QueryRow("SELECT id, cardtext, cardurl, cardtags, category, project_id, user_id FROM cards WHERE id = ? AND user_id = ?", cardID, userID).Scan(&card.CardID, &card.Text, &card.URL, &card.Tags, &card.Category, &card.ProjectID, &card.UserID)
 	if err != nil {
 		http.Error(w, "카드를 찾을 수 없거나 권한이 없습니다", http.StatusNotFound)
 		return
@@ -190,8 +192,8 @@ func updateCard(w http.ResponseWriter, r *http.Request, userID int64, idFromPath
 	}
 
 	result, err := db.Exec(
-		"UPDATE cards SET cardtext = ?, cardurl = ?, cardtags = ? WHERE id = ? AND user_id = ?",
-		card.Text, card.URL, card.Tags, cardID, userID,
+		"UPDATE cards SET cardtext = ?, cardurl = ?, cardtags = ?, category = ? WHERE id = ? AND user_id = ?",
+		card.Text, card.URL, card.Tags, card.Category, cardID, userID,
 	)
 	if err != nil {
 		http.Error(w, "카드 수정 실패", http.StatusInternalServerError)

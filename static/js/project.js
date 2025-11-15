@@ -5,11 +5,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const CARDS_API_URL = "/api/cards/";
   const PROJECTS_API_URL = "/api/projects/";
   const DOCUMENTS_API_URL = "/api/documents/";
+  const CLUSTER_API_URL = "/api/projects/cluster";
 
   // --- DOM 요소 ---
   const projectNameEl = document.getElementById("project-name");
   const cardGridEl = document.getElementById("card-grid");
   const addDocumentBtn = document.getElementById("add-document-btn");
+  const clusterBtn = document.getElementById("cluster-btn");
 
   // 사이드바 뷰 컨테이너
   const listContainer = document.getElementById("document-list-container");
@@ -88,57 +90,101 @@ document.addEventListener("DOMContentLoaded", () => {
     await fetchDocuments(projectId);
   }
 
-  // 카드 목록 렌더링 (메인 콘텐츠)
+  // 카드 목록 렌더링 (메인 콘텐츠) - 카테고리별 그룹화
   function renderCards() {
-    cardGridEl.innerHTML = "";
+    cardGridEl.innerHTML = ""; // 기존 내용 비우기
 
-    const addCardEl = document.createElement("div");
-    addCardEl.className = "card card-add";
-    addCardEl.innerHTML = `
-      <div class="card-icon-add">+</div>
-      <div class="card-name">새 카드 추가</div>
-    `;
-    addCardEl.addEventListener("click", handleCreateCard);
-    cardGridEl.appendChild(addCardEl);
+    // 1. 카드를 카테고리별로 그룹화
+    const groupedCards = cards.reduce((acc, card) => {
+      const category = card.category || "미분류";
+      if (!acc[category]) {
+        acc[category] = [];
+      }
+      acc[category].push(card);
+      return acc;
+    }, {});
 
-    cards.forEach((card) => {
-      const cardEl = document.createElement("div");
-      cardEl.className = "card";
-      cardEl.dataset.cardId = card.id;
-
-      const tags = card.cardtags
-        ? card.cardtags.split(",").map((tag) => tag.trim())
-        : [];
-      const tagsHtml = tags
-        .map((tag) => `<span class="card-tag">#${tag}</span>`)
-        .join(" ");
-
-      cardEl.innerHTML = `
-        <div>
-          <div class="card-tags">${tagsHtml}</div>
-          <p class="card-text">${card.cardtext}</p>
-        </div>
-        <button class="card-delete-btn">&times;</button>
-      `;
-
-      // 카드 클릭 시 모달 열기
-      cardEl.addEventListener("click", (e) => {
-        if (e.target.classList.contains("card-delete-btn")) {
-          return; // 삭제 버튼 클릭 시 모달 열기 방지
-        }
-        openCardModal(card);
-      });
-
-      // 삭제 버튼 이벤트 리스너
-      const deleteBtn = cardEl.querySelector(".card-delete-btn");
-      deleteBtn.addEventListener("click", (e) => {
-        e.stopPropagation(); // 이벤트 버블링 방지
-        handleDeleteCard(card.id);
-      });
-
-      cardGridEl.appendChild(cardEl);
+    // 2. 카테고리 순서 정렬 ('미분류'를 맨 뒤로)
+    const sortedCategories = Object.keys(groupedCards).sort((a, b) => {
+      if (a === "미분류") return 1;
+      if (b === "미분류") return -1;
+      return a.localeCompare(b);
     });
+
+    // 3. 각 카테고리별로 섹션 렌더링
+    sortedCategories.forEach((category) => {
+      const categorySection = document.createElement("div");
+      categorySection.className = "category-section";
+
+      const categoryTitle = document.createElement("h2");
+      categoryTitle.className = "category-title";
+      categoryTitle.textContent = category;
+      categorySection.appendChild(categoryTitle);
+
+      const innerGrid = document.createElement("div");
+      innerGrid.className = "card-grid-inner";
+      categorySection.appendChild(innerGrid);
+
+      // 해당 카테고리의 카드들 렌더링
+      groupedCards[category].forEach((card) => {
+        const cardEl = createCardElement(card);
+        innerGrid.appendChild(cardEl);
+      });
+
+      cardGridEl.appendChild(categorySection);
+    });
+
+    // 새 카드 추가 버튼은 항상 최상위 그리드에 추가
+    const addCardEl = createCardElement(null, true);
+    cardGridEl.appendChild(addCardEl);
   }
+
+  // 카드 DOM 요소를 생성하는 헬퍼 함수
+  function createCardElement(card, isAddButton = false) {
+    if (isAddButton) {
+      const addCardEl = document.createElement("div");
+      addCardEl.className = "card card-add";
+      addCardEl.innerHTML = `
+        <div class="card-icon-add">+</div>
+        <div class="card-name">새 카드 추가</div>
+      `;
+      addCardEl.addEventListener("click", handleCreateCard);
+      return addCardEl;
+    }
+
+    const cardEl = document.createElement("div");
+    cardEl.className = "card";
+    cardEl.dataset.cardId = card.id;
+
+    const tags = card.cardtags
+      ? card.cardtags.split(",").map((tag) => tag.trim())
+      : [];
+    const tagsHtml = tags
+      .map((tag) => `<span class="card-tag">#${tag}</span>`)
+      .join(" ");
+
+    cardEl.innerHTML = `
+      <div>
+        <div class="card-tags">${tagsHtml}</div>
+        <p class="card-text">${card.cardtext}</p>
+      </div>
+      <button class="card-delete-btn">&times;</button>
+    `;
+
+    cardEl.addEventListener("click", (e) => {
+      if (e.target.classList.contains("card-delete-btn")) return;
+      openCardModal(card);
+    });
+
+    const deleteBtn = cardEl.querySelector(".card-delete-btn");
+    deleteBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      handleDeleteCard(card.id);
+    });
+
+    return cardEl;
+  }
+
 
   /* ---------------- 모달 관련 함수 ---------------- */
 
@@ -217,6 +263,36 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* ---------------- 이벤트 핸들러 ---------------- */
 
+  async function handleClusterCards() {
+    if (!confirm("카드를 자동으로 분류할까요? 기존 카테고리 정보는 사라집니다.")) return;
+
+    clusterBtn.textContent = "분류 중...";
+    clusterBtn.disabled = true;
+
+    try {
+      const response = await fetch(`${CLUSTER_API_URL}?project_id=${projectId}`, {
+        method: "POST",
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`클러스터링 실패: ${errorText}`);
+      }
+
+      // 성공 후 데이터 다시 로드 및 렌더링
+      await fetchCards(projectId);
+      renderCards();
+
+    } catch (error) {
+      console.error(error);
+      alert(error.message);
+    } finally {
+      clusterBtn.textContent = "카드 클러스터링";
+      clusterBtn.disabled = false;
+    }
+  }
+
   async function handleCreateCard() {
     const text = prompt("새 카드의 내용을 입력하세요.");
     if (!text || text.trim() === "") return;
@@ -238,8 +314,8 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       
       const newCard = await response.json();
-      cards.unshift(newCard);
-      renderCards();
+      cards.push(newCard); // 배열에 추가
+      renderCards(); // 전체 다시 렌더링
 
     } catch (error) {
       console.error(error);
@@ -261,7 +337,6 @@ document.addEventListener("DOMContentLoaded", () => {
         throw new Error(`카드 삭제 실패: ${errorText}`);
       }
 
-      // 로컬 상태 업데이트 및 리렌더링
       cards = cards.filter((card) => card.id !== cardId);
       renderCards();
 
@@ -337,6 +412,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     modalCloseBtn.addEventListener("click", closeCardModal);
     modalOverlay.addEventListener("click", closeCardModal);
+    clusterBtn.addEventListener("click", handleClusterCards);
 
     await loadData();
     renderCards();

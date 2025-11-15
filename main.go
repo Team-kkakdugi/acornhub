@@ -61,6 +61,7 @@ func main() {
 	http.HandleFunc("/auth/github/callback", handleGitHubCallback)
 	http.HandleFunc("/api/me", authMiddleware(handleMe))
 	http.HandleFunc("/api/projects/", authMiddleware(handleProjects))
+	http.HandleFunc("/api/projects/cluster", authMiddleware(handleCluster))
 	http.HandleFunc("/api/cards/", authMiddleware(handleCards))
 	http.HandleFunc("/api/documents/", authMiddleware(handleDocuments))
 

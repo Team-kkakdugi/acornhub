@@ -161,10 +161,17 @@ async function fetchProjects() {
 
 async function searchProjects(keyword) {
   const query = keyword.trim();
+  const addFolderCard = document.getElementById("add-folder-card");
+  
   if (!query) {
+    // 검색어가 없으면 전체 목록 표시하고 버튼 보이기
+    if (addFolderCard) addFolderCard.style.display = "flex";
     fetchProjects();
     return;
   }
+
+  // 검색 중일 때는 새 프로젝트 버튼 숨기기
+  if (addFolderCard) addFolderCard.style.display = "none";
 
   try {
     const url = `${PROJECT_SEARCH_URL}?q=${encodeURIComponent(query)}`;
@@ -323,7 +330,7 @@ async function handleCreateProject() {
   }
 
   // 두 번째 입력: 프로젝트 주제
-  let topic = prompt("프로젝트의 주제를 .");
+  let topic = prompt("프로젝트의 주제를 적어주세요.");
   console.log("입력받은 주제:", topic);
   
   if (topic === null) {
@@ -340,7 +347,7 @@ async function handleCreateProject() {
 
   console.log("=== fetch 요청 보내기 시작 ===");
   console.log("URL:", PROJECT_LIST_URL);
-  console.log("Body:", JSON.stringify({ projectname: name }));
+  console.log("Body:", JSON.stringify({ projectname: name, topic: topic }));
 
   try {
     const res = await fetch(PROJECT_LIST_URL, {
@@ -349,7 +356,10 @@ async function handleCreateProject() {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ projectname: name }),
+      body: JSON.stringify({ 
+        projectname: name,
+        topic: topic 
+      }),
     });
 
     console.log("=== fetch 응답 받음 ===");
@@ -401,9 +411,6 @@ async function handleCreateProject() {
     renderProjects();
     renderSidebarProjects();
     console.log("=== 완료 ===");
-    
-    // TODO: 나중에 주제(topic)를 서버에 저장하는 API가 생기면 여기서 추가 요청
-    console.log("프로젝트 주제:", topic);
   } catch (err) {
     console.error("[POST /api/projects] 에러:", err);
     alert("프로젝트를 생성하는 중 오류가 발생했어요: " + err.message);

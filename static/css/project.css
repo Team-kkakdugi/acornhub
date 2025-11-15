@@ -48,6 +48,12 @@ html {
   font-weight: 700;
 }
 
+.project-title-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
 .back-to-dashboard {
   text-decoration: none;
   color: var(--accent-color);
@@ -59,6 +65,24 @@ html {
 }
 
 .card-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+}
+
+.category-section {
+  width: 100%;
+}
+
+.category-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.card-grid-inner {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 1.5rem;

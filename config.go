@@ -75,6 +75,7 @@ func setupDatabase() error {
 		cardtext TEXT,
 		cardurl TEXT,
 		cardtags TEXT,
+		category TEXT,
 		project_id INTEGER,
 		user_id INTEGER,
 		FOREIGN KEY(project_id) REFERENCES projects(id),
@@ -82,6 +83,43 @@ func setupDatabase() error {
 	);`
 	if _, err := db.Exec(createCardsTableSQL); err != nil {
 		return err
+	}
+
+	// documents 테이블에 대한 스키마 마이그레이션 (기존 코드와 동일한 패턴)
+	if err := migrateDocumentsTable(); err != nil {
+		return err
+	}
+
+	// cards 테이블에 category 컬럼이 없는 구버전 스키마를 위한 마이그레이션
+	rows, err := db.Query("PRAGMA table_info(cards)")
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	var categoryColumnExists bool
+	for rows.Next() {
+		var cid int
+		var name string
+		var type_ string
+		var notnull bool
+		var dflt_value interface{}
+		var pk int
+		if err := rows.Scan(&cid, &name, &type_, &notnull, &dflt_value, &pk); err != nil {
+			return err
+		}
+		if name == "category" {
+			categoryColumnExists = true
+			break
+		}
+	}
+
+	if !categoryColumnExists {
+		fmt.Println("기존 cards 테이블에 'category' 컬럼이 없어 추가합니다...")
+		_, err := db.Exec("ALTER TABLE cards ADD COLUMN category TEXT")
+		if err != nil {
+			return err
+		}
 	}
 
 	createDocumentsTableSQL := `
@@ -100,5 +138,13 @@ func setupDatabase() error {
 		return err
 	}
 
+	return nil
+}
+
+// migrateDocumentsTable는 documents 테이블의 스키마를 최신 상태로 유지합니다.
+func migrateDocumentsTable() error {
+	// 예시: 만약 나중에 documents 테이블에 'status' 컬럼이 추가된다면,
+	// 아래와 같은 마이그레이션 로직을 추가할 수 있습니다.
+	// 현재는 특별한 변경사항이 없으므로 비워둡니다.
 	return nil
 }
