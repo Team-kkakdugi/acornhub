@@ -36,7 +36,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function fetchProjectDetails(id) {
     try {
-      const response = await fetch(`${PROJECTS_API_URL}/${id}`, {
+      const response = await fetch(`${PROJECTS_API_URL}${id}`, {
         credentials: "include",
       });
       if (!response.ok) {
@@ -104,17 +104,38 @@ document.addEventListener("DOMContentLoaded", () => {
     cards.forEach((card) => {
       const cardEl = document.createElement("div");
       cardEl.className = "card";
-      
-      const tags = card.cardtags ? card.cardtags.split(',').map(tag => tag.trim()) : [];
+      cardEl.dataset.cardId = card.id;
+
+      const tags = card.cardtags
+        ? card.cardtags.split(",").map((tag) => tag.trim())
+        : [];
       const tagsHtml = tags
         .map((tag) => `<span class="card-tag">#${tag}</span>`)
         .join(" ");
 
       cardEl.innerHTML = `
-        <div class="card-tags">${tagsHtml}</div>
-        <p class="card-text">${card.cardtext}</p>
+        <div>
+          <div class="card-tags">${tagsHtml}</div>
+          <p class="card-text">${card.cardtext}</p>
+        </div>
+        <button class="card-delete-btn">&times;</button>
       `;
-      cardEl.addEventListener("click", () => openCardModal(card));
+
+      // 카드 클릭 시 모달 열기
+      cardEl.addEventListener("click", (e) => {
+        if (e.target.classList.contains("card-delete-btn")) {
+          return; // 삭제 버튼 클릭 시 모달 열기 방지
+        }
+        openCardModal(card);
+      });
+
+      // 삭제 버튼 이벤트 리스너
+      const deleteBtn = cardEl.querySelector(".card-delete-btn");
+      deleteBtn.addEventListener("click", (e) => {
+        e.stopPropagation(); // 이벤트 버블링 방지
+        handleDeleteCard(card.id);
+      });
+
       cardGridEl.appendChild(cardEl);
     });
   }
@@ -215,9 +236,35 @@ document.addEventListener("DOMContentLoaded", () => {
         const errorText = await response.text();
         throw new Error(`카드 생성 실패: ${errorText}`);
       }
-
-      await fetchCards(projectId);
+      
+      const newCard = await response.json();
+      cards.unshift(newCard);
       renderCards();
+
+    } catch (error) {
+      console.error(error);
+      alert(error.message);
+    }
+  }
+
+  async function handleDeleteCard(cardId) {
+    if (!confirm("이 카드를 정말 삭제하시겠습니까?")) return;
+
+    try {
+      const response = await fetch(`${CARDS_API_URL}${cardId}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`카드 삭제 실패: ${errorText}`);
+      }
+
+      // 로컬 상태 업데이트 및 리렌더링
+      cards = cards.filter((card) => card.id !== cardId);
+      renderCards();
+
     } catch (error) {
       console.error(error);
       alert(error.message);

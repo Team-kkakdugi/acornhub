@@ -303,7 +303,7 @@ function renderSidebarProjects() {
 async function handleCreateProject() {
   console.log("=== handleCreateProject 함수 시작 ===");
   
-  let name = prompt("새 폴더 이름을 입력하세요.");
+  let name = prompt("새 프로젝트 이름을 입력하세요.");
   console.log("입력받은 이름:", name);
   
   if (name === null) {
@@ -318,7 +318,23 @@ async function handleCreateProject() {
   }
 
   if (isDuplicateFolderName(name)) {
-    alert("같은 이름의 폴더가 이미 있어요. 다른 이름을 입력해 주세요.");
+    alert("같은 이름의 프로젝트가 이미 있어요. 다른 이름을 입력해 주세요.");
+    return;
+  }
+
+  // 두 번째 입력: 프로젝트 주제
+  let topic = prompt("프로젝트의 주제를 .");
+  console.log("입력받은 주제:", topic);
+  
+  if (topic === null) {
+    console.log("취소됨");
+    return;
+  }
+  
+  topic = topic.trim();
+  if (!topic) {
+    console.log("주제가 빈 문자열");
+    alert("프로젝트 주제를 입력해주세요.");
     return;
   }
 
@@ -385,6 +401,9 @@ async function handleCreateProject() {
     renderProjects();
     renderSidebarProjects();
     console.log("=== 완료 ===");
+    
+    // TODO: 나중에 주제(topic)를 서버에 저장하는 API가 생기면 여기서 추가 요청
+    console.log("프로젝트 주제:", topic);
   } catch (err) {
     console.error("[POST /api/projects] 에러:", err);
     alert("프로젝트를 생성하는 중 오류가 발생했어요: " + err.message);
@@ -394,7 +413,7 @@ async function handleCreateProject() {
 /* ---------------- 프로젝트 삭제 ---------------- */
 
 async function handleDeleteProject(project) {
-  const ok = confirm(`'${project.projectname}' 폴더를 삭제할까요?`);
+  const ok = confirm(`'${project.projectname}' 프로젝트를 삭제할까요?`);
   if (!ok) return;
 
   try {

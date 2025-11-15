@@ -71,10 +71,41 @@ html {
   padding: 1.5rem;
   box-shadow: var(--card-shadow);
   transition: box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  height: 220px; /* 고정 높이 설정 */
 }
 .card:hover {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   transform: translateY(-3px);
+}
+
+.card-delete-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: none;
+  background-color: rgba(0, 0, 0, 0.1);
+  color: white;
+  font-size: 14px;
+  line-height: 24px;
+  text-align: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s, background-color 0.2s;
+}
+
+.card:hover .card-delete-btn {
+  opacity: 1;
+}
+
+.card-delete-btn:hover {
+  background-color: #d94848;
 }
 
 .card-tags {
@@ -82,6 +113,7 @@ html {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
+  flex-shrink: 0; /* 태그 영역은 줄어들지 않도록 설정 */
 }
 
 .card-tag {
@@ -98,6 +130,12 @@ html {
   font-size: 0.95rem;
   line-height: 1.6;
   color: var(--text-light);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 4; /* 4줄까지 보여주고 ... 처리 */
+  -webkit-box-orient: vertical;
+  flex-grow: 1; /* 텍스트 영역이 남은 공간을 모두 차지하도록 설정 */
 }
 
 /* Sidebar */
