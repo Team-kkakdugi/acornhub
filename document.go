@@ -2,13 +2,43 @@
 package main
 
 import (
+	"bytes"
+	"database/sql"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
 )
+
+// --- AI 서버 연동을 위한 구조체 정의 ---
+
+// AgentInvokeRequest는 AI 서버 /agent/invoke 엔드포인트에 보낼 요청 본문입니다.
+type AgentInvokeRequest struct {
+	Topic         string         `json:"topic"`
+	AllTags       []string       `json:"all_tags"`
+	AllCategories []CategoryInfo `json:"all_categories"`
+	AllCards      []CardForAI    `json:"all_cards"`
+}
+
+// CardForAI는 AI 서버에 카드 정보를 전달하기 위한 구조체입니다.
+type CardForAI struct {
+	ID      int64  `json:"id"`
+	Content string `json:"content"`
+}
+
+// CategoryInfo는 AI 서버에 카테고리 정보를 전달하기 위한 구조체입니다.
+type CategoryInfo struct {
+	CategoryName string  `json:"category_name"`
+	CardIDs      []int64 `json:"card_ids"`
+}
+
+// AgentInvokeResponse는 AI 서버로부터 받을 응답 본문입니다.
+type AgentInvokeResponse struct {
+	Report string `json:"report"`
+}
 
 // Document 구조체 (DB 스키마 기반)
 type Document struct {
@@ -34,7 +64,7 @@ func handleDocuments(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case "POST":
-		createDocument(w, r, userID)
+		createDocumentWithAI(w, r, userID) // 기존 createDocument 대신 호출
 	case "GET":
 		if idFromPath != "" {
 			getDocument(w, r, userID, idFromPath)
@@ -50,21 +80,96 @@ func handleDocuments(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// generateDummyContent는 새 문서의 기본 내용을 생성합니다.
-func generateDummyContent(title string) string {
-	return fmt.Sprintf("<h2>%s</h2><p>새로 생성된 문서입니다. 내용을 입력하세요.</p>", title)
+// --- AI 서버 연동을 위한 데이터 조회 함수들 ---
+
+func getAllCardsForProject(projectID int64, userID int64) ([]CardForAI, error) {
+	query := `SELECT id, cardtext FROM cards WHERE project_id = ? AND user_id = ?`
+	rows, err := db.Query(query, projectID, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var cards []CardForAI
+	for rows.Next() {
+		var c CardForAI
+		if err := rows.Scan(&c.ID, &c.Content); err != nil {
+			return nil, err
+		}
+		cards = append(cards, c)
+	}
+	return cards, nil
 }
 
-func createDocument(w http.ResponseWriter, r *http.Request, userID int64) {
+func getAllTagsForProject(projectID int64, userID int64) ([]string, error) {
+	query := `SELECT cardtags FROM cards WHERE project_id = ? AND user_id = ?`
+	rows, err := db.Query(query, projectID, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	tagSet := make(map[string]struct{})
+	for rows.Next() {
+		var tagsStr string
+		if err := rows.Scan(&tagsStr); err != nil {
+			return nil, err
+		}
+		// 쉼표로 구분된 태그 문자열을 개별 태그로 분리
+		tags := strings.Split(tagsStr, ",")
+		for _, tag := range tags {
+			trimmedTag := strings.TrimSpace(tag)
+			if trimmedTag != "" {
+				tagSet[trimmedTag] = struct{}{}
+			}
+		}
+	}
+
+	// 맵의 키를 사용하여 중복이 제거된 태그 목록 생성
+	uniqueTags := make([]string, 0, len(tagSet))
+	for tag := range tagSet {
+		uniqueTags = append(uniqueTags, tag)
+	}
+
+	return uniqueTags, nil
+}
+
+func getAllCategoriesForProject(projectID int64, userID int64) ([]CategoryInfo, error) {
+	query := `SELECT category, GROUP_CONCAT(id) FROM cards WHERE project_id = ? AND user_id = ? AND category IS NOT NULL AND category != '' GROUP BY category`
+	rows, err := db.Query(query, projectID, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var categories []CategoryInfo
+	for rows.Next() {
+		var ci CategoryInfo
+		var cardIDsStr string
+		if err := rows.Scan(&ci.CategoryName, &cardIDsStr); err != nil {
+			return nil, err
+		}
+
+		ids := strings.Split(cardIDsStr, ",")
+		for _, idStr := range ids {
+			id, _ := strconv.ParseInt(idStr, 10, 64)
+			ci.CardIDs = append(ci.CardIDs, id)
+		}
+		categories = append(categories, ci)
+	}
+	return categories, nil
+}
+
+// createDocumentWithAI는 AI 서버를 호출하여 문서 초안을 생성합니다.
+func createDocumentWithAI(w http.ResponseWriter, r *http.Request, userID int64) {
 	var doc Document
 	if err := json.NewDecoder(r.Body).Decode(&doc); err != nil {
 		http.Error(w, "잘못된 JSON 형식", http.StatusBadRequest)
 		return
 	}
 	doc.UserID = userID
-	doc.Content = generateDummyContent(doc.Title) // 자동 생성된 내용 할당
 
-	// 사용자가 해당 프로젝트의 소유자인지 확인
+	// 1. 프로젝트 소유권 확인
 	var projectOwnerID int64
 	err := db.QueryRow("SELECT user_id FROM projects WHERE id = ?", doc.ProjectID).Scan(&projectOwnerID)
 	if err != nil || projectOwnerID != userID {
@@ -72,6 +177,59 @@ func createDocument(w http.ResponseWriter, r *http.Request, userID int64) {
 		return
 	}
 
+	// 2. AI 서버에 보낼 데이터 수집
+	allCards, err := getAllCardsForProject(doc.ProjectID, userID)
+	if err != nil {
+		http.Error(w, "카드 정보 조회 실패: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	allTags, err := getAllTagsForProject(doc.ProjectID, userID)
+	if err != nil {
+		http.Error(w, "태그 정보 조회 실패: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	allCategories, err := getAllCategoriesForProject(doc.ProjectID, userID)
+	if err != nil {
+		http.Error(w, "카테고리 정보 조회 실패: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// 3. AI 서버에 요청
+	aiRequestData := AgentInvokeRequest{
+		Topic:         doc.Title,
+		AllTags:       allTags,
+		AllCategories: allCategories,
+		AllCards:      allCards,
+	}
+	jsonData, err := json.Marshal(aiRequestData)
+	if err != nil {
+		http.Error(w, "AI 요청 데이터 생성 실패", http.StatusInternalServerError)
+		return
+	}
+
+	aiServerURL := "http://127.0.0.1:8000/agent/invoke"
+	resp, err := http.Post(aiServerURL, "application/json", bytes.NewBuffer(jsonData))
+	if err != nil {
+		http.Error(w, "AI 서버 호출 실패: "+err.Error(), http.StatusServiceUnavailable)
+		return
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		bodyBytes, _ := io.ReadAll(resp.Body)
+		errorMsg := fmt.Sprintf("AI 서버 오류 (상태 코드: %d): %s", resp.StatusCode, string(bodyBytes))
+		http.Error(w, errorMsg, http.StatusInternalServerError)
+		return
+	}
+
+	var aiResponse AgentInvokeResponse
+	if err := json.NewDecoder(resp.Body).Decode(&aiResponse); err != nil {
+		http.Error(w, "AI 서버 응답 파싱 실패", http.StatusInternalServerError)
+		return
+	}
+	doc.Content = aiResponse.Report // AI가 생성한 내용으로 교체
+
+	// 4. DB에 새 문서 저장
 	query := "INSERT INTO documents (title, content, project_id, user_id) VALUES (?, ?, ?, ?)"
 	result, err := db.Exec(query, doc.Title, doc.Content, doc.ProjectID, doc.UserID)
 	if err != nil {
@@ -86,7 +244,7 @@ func createDocument(w http.ResponseWriter, r *http.Request, userID int64) {
 	}
 	doc.ID = docID
 
-	// 생성된 전체 문서를 다시 조회하여 반환 (타임스탬프 등 포함)
+	// 5. 생성된 전체 문서 정보 반환
 	err = db.QueryRow("SELECT created_at, updated_at FROM documents WHERE id = ?", docID).Scan(&doc.CreatedAt, &doc.UpdatedAt)
 	if err != nil {
 		http.Error(w, "생성된 문서 정보 조회 실패", http.StatusInternalServerError)
@@ -110,7 +268,6 @@ func getDocumentsByProject(w http.ResponseWriter, r *http.Request, userID int64)
 		return
 	}
 
-	// 프로젝트 소유권 확인
 	var projectOwnerID int64
 	err = db.QueryRow("SELECT user_id FROM projects WHERE id = ?", projectID).Scan(&projectOwnerID)
 	if err != nil || projectOwnerID != userID {
@@ -118,7 +275,7 @@ func getDocumentsByProject(w http.ResponseWriter, r *http.Request, userID int64)
 		return
 	}
 
-	rows, err := db.Query("SELECT id, title, content, project_id, user_id, created_at, updated_at FROM documents WHERE project_id = ? AND user_id = ?", projectID, userID)
+	rows, err := db.Query("SELECT id, title, content, project_id, user_id, created_at, updated_at FROM documents WHERE project_id = ? AND user_id = ? ORDER BY created_at DESC", projectID, userID)
 	if err != nil {
 		http.Error(w, "문서 목록 조회 실패", http.StatusInternalServerError)
 		return
@@ -150,7 +307,11 @@ func getDocument(w http.ResponseWriter, r *http.Request, userID int64, idFromPat
 	query := "SELECT id, title, content, project_id, user_id, created_at, updated_at FROM documents WHERE id = ? AND user_id = ?"
 	err = db.QueryRow(query, docID, userID).Scan(&doc.ID, &doc.Title, &doc.Content, &doc.ProjectID, &doc.UserID, &doc.CreatedAt, &doc.UpdatedAt)
 	if err != nil {
-		http.Error(w, "문서를 찾을 수 없거나 권한이 없습니다", http.StatusNotFound)
+		if err == sql.ErrNoRows {
+			http.Error(w, "문서를 찾을 수 없거나 권한이 없습니다", http.StatusNotFound)
+		} else {
+			http.Error(w, "문서 조회 실패", http.StatusInternalServerError)
+		}
 		return
 	}
 

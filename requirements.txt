@@ -10,3 +10,4 @@ keybert
 torch
 transformers
 sentencepiece
+anthropic

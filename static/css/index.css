@@ -11,7 +11,7 @@ body {
 }
 
 body {
-  font-family: 'Pretendard Variable', 'Apple SD Gothic Neo', 'Noto Sans KR', 
+  font-family: 'Pretendard Variable', 'Apple SD Gothic Neo', 'Noto Sans KR',
     -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   background-color: #ffffff;
   color: #222;
@@ -34,9 +34,9 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  position: relative;
 }
 
-/* 로고 섹션 */
 .logo-section {
   display: flex;
   align-items: center;
@@ -58,14 +58,15 @@ body {
   display: block;
 }
 
-/* 브랜드 이름 */
 .brand-name {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
   font-size: 24px;
   font-weight: 700;
   color: #222;
 }
 
-/* 로그인 버튼 */
 .btn-login {
   padding: 10px 28px;
   border-radius: 8px;
@@ -86,79 +87,59 @@ body {
 /* 히어로 섹션 */
 .hero {
   background-color: #ffffff;
-  padding: 60px 40px 80px;
+  padding: 32px 40px 80px;
+  min-height: 100vh;
+  display: flex;
+  align-items: flex-start;
 }
 
 .hero-inner {
   max-width: 1400px;
   margin: 0 auto;
+  width: 100%;
 }
 
-/* 메인 타이틀 */
 .hero-title {
   font-size: 36px;
   font-weight: 700;
   text-align: center;
-  margin: 0 0 60px;
+  margin: 0 0 40px;
   color: #222;
 }
 
-/* 히어로 콘텐츠 2컬럼 */
 .hero-content {
   display: flex;
-  gap: 80px;
-  align-items: flex-start;
-  justify-content: space-between;
+  justify-content: center;
+  align-items: center;
+  gap: 40px;
 }
 
-/* 왼쪽 텍스트 블럭 */
-.hero-text-block {
-  flex: 1;
-  max-width: 600px;
-}
-
-.hero-subheading {
-  font-size: 24px;
-  font-weight: 700;
-  margin: 0 0 24px;
-  line-height: 1.5;
+.hero-tagline {
+  max-width: 420px;
+  font-size: 22px;
+  line-height: 1.7;
   color: #222;
 }
 
-.hero-intro {
-  font-size: 15px;
-  line-height: 1.7;
-  margin: 0 0 20px;
-  color: #444;
-}
-
-.hero-description {
-  font-size: 15px;
-  line-height: 1.7;
-  margin: 0 0 32px;
-  color: #444;
-}
-
-/* 특징 리스트 */
-.features-list {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.feature-item {
-  font-size: 15px;
-  line-height: 1.7;
+.hero-tagline-main {
   margin: 0;
-  color: #333;
 }
 
-.feature-item strong {
-  font-weight: 600;
+.hero-tagline-sub {
+  margin: 40px 0 0;
+  font-size: 18px;
+  line-height: 1.8;
+  color: #444;
+}
+
+.hero-tagline-third {
+  margin: 40px 0 0;
+  font-size: 18px;
+  line-height: 1.8;
   color: #222;
+  text-align: right;
 }
 
-/* 오른쪽 이미지 */
 .hero-image-placeholder {
   flex: 0 0 500px;
   min-height: 500px;
@@ -172,8 +153,89 @@ body {
 
 .hero-image-placeholder img {
   width: 100%;
-  height: 100%;
+  height: auto;
   object-fit: contain;
+}
+
+/* --- 아콘허브가 더 특별한 이유 섹션 --- */
+.special-section {
+  padding: 80px 40px 120px;
+  background-color: #ffffff;
+}
+
+.special-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.special-title {
+  font-size: 28px;
+  font-weight: 700;
+  text-align: center;
+  margin: 0;
+  color: #222;
+}
+
+.special-grid {
+  margin-top: 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 64px;
+}
+
+/* 한 줄(이미지 + 텍스트) */
+.special-item {
+  display: flex;
+  align-items: center;      /* 수직 가운데 정렬 */
+  gap: 140px;                /* ✅ 사진–글 사이 거리 크게 넓힘 (48 → 80) */
+}
+
+/* 글 왼 / 사진 오른 줄 */
+.special-item-reverse {
+  flex-direction: row-reverse;
+}
+
+/* reverse 줄에서 텍스트를 이미지 쪽으로 붙이기 */
+.special-item-reverse .special-text {
+  text-align: right;
+}
+
+/* 회색 이미지 자리 */
+.special-image {
+  flex: 0 0 540px;          /* 1.5배로 키운 상태 유지 */
+  background-color: #e3e3e3;
+  border-radius: 8px;
+}
+
+.special-image-wide {
+  height: 300px;
+}
+
+.special-image-tall {
+  height: 390px;
+}
+
+/* 텍스트 영역 */
+.special-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;   /* 텍스트 덩어리 세로 가운데 */
+  font-size: 18px;
+  line-height: 1.9;
+  color: #333;
+}
+
+.special-text-title {
+  margin: 0 0 12px;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.special-text-desc {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.9;
 }
 
 /* 태블릿 */
@@ -192,21 +254,57 @@ body {
   }
 
   .hero {
-    padding: 40px 24px 60px;
+    padding: 24px 24px 60px;
   }
 
   .hero-title {
     font-size: 28px;
-    margin-bottom: 40px;
+    margin-bottom: 32px;
   }
 
   .hero-content {
-    gap: 40px;
+    gap: 32px;
   }
 
   .hero-image-placeholder {
     flex: 0 0 400px;
     min-height: 400px;
+  }
+
+  .special-section {
+    padding: 60px 24px 100px;
+  }
+
+  .special-inner {
+    max-width: 960px;
+  }
+
+  .special-image {
+    flex-basis: 360px;
+  }
+
+  .special-image-wide {
+    height: 240px;
+  }
+
+  .special-image-tall {
+    height: 300px;
+  }
+
+  .special-item {
+    gap: 48px;              /* 태블릿은 살짝 줄인 간격 */
+  }
+
+  .special-text {
+    font-size: 17px;
+  }
+
+  .special-text-title {
+    font-size: 20px;
+  }
+
+  .special-text-desc {
+    font-size: 17px;
   }
 }
 
@@ -218,7 +316,6 @@ body {
 
   .logo-placeholder {
     width: 32px;
-    height: 32px;
   }
 
   .brand-name {
@@ -231,30 +328,91 @@ body {
   }
 
   .hero {
-    padding: 32px 16px 60px;
+    padding: 24px 16px 40px;
+    min-height: auto;
   }
 
   .hero-title {
     font-size: 24px;
-    margin-bottom: 32px;
+    margin-bottom: 24px;
   }
 
   .hero-content {
     flex-direction: column;
-    gap: 40px;
+    gap: 24px;
+    align-items: flex-start;
   }
 
-  .hero-text-block {
+  .hero-tagline {
     max-width: 100%;
+    font-size: 20px;
   }
 
-  .hero-subheading {
-    font-size: 20px;
+  .hero-tagline-sub {
+    margin-top: 28px;
+    font-size: 17px;
+  }
+
+  .hero-tagline-third {
+    margin-top: 28px;
+    font-size: 17px;
+    text-align: right;
   }
 
   .hero-image-placeholder {
     flex: 1 1 auto;
     width: 100%;
-    min-height: 300px;
+    min-height: 260px;
+  }
+
+  .special-section {
+    padding: 40px 16px 80px;
+  }
+
+  .special-title {
+    font-size: 24px;
+  }
+
+  .special-grid {
+    margin-top: 40px;
+    gap: 40px;
+  }
+
+  .special-item,
+  .special-item-reverse {
+    flex-direction: column;
+    gap: 20px;
+    align-items: flex-start;
+  }
+
+  .special-item-reverse .special-text {
+    text-align: left;
+  }
+
+  .special-text {
+    align-items: flex-start;
+    font-size: 17px;
+    line-height: 1.8;
+  }
+
+  .special-text-title {
+    font-size: 20px;
+  }
+
+  .special-text-desc {
+    font-size: 17px;
+  }
+
+  .special-image {
+    width: 100%;
+    flex-basis: auto;
+  }
+
+  .special-image-wide {
+    height: 220px;
+  }
+
+  .special-image-tall {
+    height: 280px;
   }
 }

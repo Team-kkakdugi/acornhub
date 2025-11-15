@@ -10,85 +10,126 @@
   <!-- 상단 네비게이션 -->
   <header class="top-nav">
     <div class="top-nav-inner">
-      <!-- 왼쪽: 로고 -->
       <div class="logo-section">
         <div class="logo-placeholder">
           <img src="assets/logo.png" alt="Acorn Hub 로고" />
         </div>
-        <span class="brand-name">Acorn Hub</span>
       </div>
-      <!-- 오른쪽: 로그인 버튼 -->
+      <span class="brand-name">Acorn Hub</span>
       <button id="github-login-btn" class="btn-login">로그인</button>
     </div>
   </header>
 
-  <!-- 메인 콘텐츠 -->
   <main>
     <!-- 히어로 섹션 -->
     <section class="hero">
       <div class="hero-inner">
-        <!-- 메인 타이틀 -->
         <h1 class="hero-title">
           자기주도형 자료조사 AI, 아콘허브(Acorn Hub)
         </h1>
 
         <div class="hero-content">
-          <!-- 왼쪽 텍스트 블럭 -->
-          <div class="hero-text-block">
-            <h2 class="hero-subheading">
-              AI가 대신 공부해주는 시대는 끝났다!<br/>
-              이제 스스로 연구하는 힘을 되찾아라!
-            </h2>
-            
-            <p class="hero-intro">
-              요즘 공부?! 버튼 하나로 모든 문제조차 상위는 시대...<br/>
+          <div class="hero-tagline">
+            <p class="hero-tagline-main">
+              <strong>
+                AI가 대신 공부해주는 시대는 끝났다!<br />
+                이제 스스로 연구하는 힘을 되찾아라!
+              </strong>
+            </p>
+            <p class="hero-tagline-sub">
+              요즘 공부? 버튼 하나로 요약된 콘텐츠만 삼키는 시대...<br />
               하지만 진짜 실력은 스스로 찾고, 비교하고, 정리할 때 만들어진다.
             </p>
-
-            <p class="hero-description">
-              도토리가 익으면 돌아오긴 기다리는 다람쥐는 절대 강해지지 않는다.<br/>
-              자신도 따갈까다.<br/>
-              넓어라, 찾아라, 모아라.<br/>
-              아콘허브가 스스로 공부하는 힘을 되찾아준다.
+            <p class="hero-tagline-third">
+              다람쥐처럼<br />
+              뛰어라! 찾아라! 모아라!<br />
+              아콘허브가 ‘스스로 공부하는 힘’을 되찾아준다.
             </p>
+          </div>
 
-            <div class="features-list">
-              <p class="feature-item">🌰 아콘허브가 더 특별한 이유!!</p>
-              
-              <p class="feature-item">
-                <strong>1. 중산생각 간</strong><br/>
-                AI가 대신 생각하는 시대를 넘어,<br/>
-                당신이 세운 아이디어를 중산으로 본 설이 전개된다.
+          <div class="hero-image-placeholder">
+            <img src="assets/squirrel.png" alt="다람쥐 일러스트" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 아콘허브가 더 특별한 이유 -->
+    <section class="special-section">
+      <div class="special-inner">
+        <h2 class="special-title">
+          🌰 Acorn Hub가 더 특별한 이유🌰
+        </h2>
+
+        <div class="special-grid">
+          <!-- 1번: 이미지 왼 / 글 오른 -->
+          <div class="special-item">
+            <div class="special-image special-image-wide"></div>
+            <div class="special-text">
+              <p class="special-text-title">
+                🔥 <strong>1. 중심생각 간</strong>
               </p>
-
-              <p class="feature-item">
-                <strong>📝 2. NER 기반 키워드 뽑기 + 자동 마인드맵</strong><br/>
-                자료 순 개념들이 구조화되어 한눈에 보인다.<br/>
-                내가 무엇을 공부해야 하는지가 명확해진다.
-              </p>
-
-              <p class="feature-item">
-                <strong>🌲 3. 트리 모델링</strong><br/>
-                복잡한 자료를 주제별로 자동 분류,<br/>
-                연구의 흐릿점을 확실하게 정립한다.
-              </p>
-
-              <p class="feature-item">
-                <strong>🌰 4. 자료 읽덤 → 자료 정리 & 요약</strong><br/>
-                지푸는 당신이 보고, 정리 : 인수처리는 아콘허브가 받아준다.
-              </p>
-
-              <p class="feature-item">
-                <strong>◆ 5. 일반 모드 & 허츠 모드</strong><br/>
-                · 일반 모드: 빠르게 주일하고 빠르게 따라<br/>
-                · 학습 모드: 스스로 공부할 유도하는 단계별 본석 지원
+              <p class="special-text-desc">
+                AI가 대신 생각하는 시대를 넘어,<br />
+                당신이 세운 핵심 아이디어를 중심으로 모든 분석이 진행된다.
               </p>
             </div>
           </div>
 
-          <!-- 오른쪽 이미지 -->
-          <div class="hero-image-placeholder">
-            <img src="assets/squirrel.png" alt="다람쥐 일러스트" />
+          <!-- 2번: 글 왼 / 이미지 오른 -->
+          <div class="special-item special-item-reverse">
+            <div class="special-image special-image-wide"></div>
+            <div class="special-text">
+              <p class="special-text-title">
+                ✏️ <strong>2. NER 기반 키워드를 한눈에 본다</strong>
+              </p>
+              <p class="special-text-desc">
+                텍스트 속 개념들을 자동으로 뽑아 구조화한다.<br />
+                ‘내가 무엇을 공부해야 하는지’가 명확해진다.
+              </p>
+            </div>
+          </div>
+
+          <!-- 3번 -->
+          <div class="special-item">
+            <div class="special-image special-image-tall"></div>
+            <div class="special-text">
+              <p class="special-text-title">
+                🍀 <strong>3. 토픽 모델링</strong>
+              </p>
+              <p class="special-text-desc">
+                복잡한 자료를 주제별로 자동 분류한다.<br />
+                연구의 흐름과 방향성이 훨씬 또렷해진다.
+              </p>
+            </div>
+          </div>
+
+          <!-- 4번: 글 왼 / 이미지 오른 -->
+          <div class="special-item special-item-reverse">
+            <div class="special-image special-image-tall"></div>
+            <div class="special-text">
+              <p class="special-text-title">
+                📄 <strong>4. 자료 입력 → 자동 정리 &amp; 요약</strong>
+              </p>
+              <p class="special-text-desc">
+                자료는 당신이 넣고,<br />
+                정리·요약·구조화는 아콘허브가 맡아준다.
+              </p>
+            </div>
+          </div>
+
+          <!-- 5번 -->
+          <div class="special-item">
+            <div class="special-image special-image-wide"></div>
+            <div class="special-text">
+              <p class="special-text-title">
+                🧭 <strong>5. 일단 모드 &amp; 학습 모드</strong>
+              </p>
+              <p class="special-text-desc">
+                • <b>일반 모드</b>: 빠르게 수집하고 한눈에 파악<br />
+                • <b>학습 모드</b>: ‘스스로 공부’를 유도하는 단계별 분석 지원
+              </p>
+            </div>
           </div>
         </div>
       </div>
