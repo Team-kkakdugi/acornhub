@@ -13,10 +13,9 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-// GitHub API 응답(JSON)을 파싱하기 위한 구조체
 type GitHubUser struct {
-	ID       int64  `json:"id"`    // GitHub의 고유 ID
-	Username string `json:"login"` // GitHub의 사용자 이름
+	ID       int64  `json:"id"`
+	Username string `json:"login"`
 }
 
 type jwtClaims struct {
@@ -48,8 +47,6 @@ func createJWT(userID int64) (string, error) {
 	return tokenString, nil
 }
 
-// --- 핸들러 함수 ---
-
 func handleLogout(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, &http.Cookie{
 		Name:     "auth_token",
@@ -62,7 +59,6 @@ func handleLogout(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 }
 
-// 사용자를 GitHub 인증 페이지로 리디렉션
 // CSRF 방지를 위해 무작위 state 문자열을 생성하여 쿠키에 저장
 func handleGitHubLogin(w http.ResponseWriter, r *http.Request) {
 	b := make([]byte, 32)
@@ -161,11 +157,11 @@ func handleGitHubCallback(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.SetCookie(w, &http.Cookie{
-		Name:     "auth_token",   // 쿠키 이름 (JWT 저장)
-		Value:    tokenString,    // 생성된 JWT 문자열
-		Expires:  time.Now().Add(3 * time.Hour), // 쿠키 만료 시간 (토큰과 동일하게)
+		Name:     "auth_token",
+		Value:    tokenString,
+		Expires:  time.Now().Add(3 * time.Hour),
 		HttpOnly: true, // JavaScript에서 접근 불가 (필수 보안)
-		Path:     "/",  // 사이트 전체에서 쿠키 사용
+		Path:     "/",
 	})
 
 	http.Redirect(w, r, "/dashboard.html", http.StatusTemporaryRedirect)

@@ -1,13 +1,6 @@
-// ✅ 1. 백엔드 주소 & 엔드포인트
 const API_BASE_URL = "https://oli.tailda0655.ts.net";
-
-// GitHub 로그인 시작 주소
 const GITHUB_LOGIN_URL = `${API_BASE_URL}/auth/github`;
-
-// 현재 로그인 사용자 정보 확인
 const ME_URL = `${API_BASE_URL}/api/me/`;
-
-// 로그인 성공 후 이동할 페이지
 const AFTER_LOGIN_URL = "/dashboard.html";
 
 async function checkLoginAndRedirect() {
@@ -35,7 +28,6 @@ async function checkLoginAndRedirect() {
   }
 }
 
-// 로그인 페이지로 이동
 document.addEventListener("DOMContentLoaded", () => {
   const githubLoginBtn = document.getElementById("github-login-btn");
 

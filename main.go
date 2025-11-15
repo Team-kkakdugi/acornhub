@@ -1,4 +1,3 @@
-// main.go
 package main
 
 import (
@@ -55,7 +54,6 @@ func main() {
 	}
 	defer db.Close()
 
-	// API 및 인증 핸들러 등록
 	http.HandleFunc("/auth/logout", handleLogout)
 	http.HandleFunc("/auth/github", handleGitHubLogin)
 	http.HandleFunc("/auth/github/callback", handleGitHubCallback)
@@ -65,7 +63,6 @@ func main() {
 	http.HandleFunc("/api/cards/", authMiddleware(handleCards))
 	http.HandleFunc("/api/documents/", authMiddleware(handleDocuments))
 
-	// 정적 파일 서버 설정
 	// 위에서 등록된 API 경로 외의 모든 요청은 static 디렉토리의 파일을 제공합니다.
 	// 예를 들어, "/" 요청은 "static/index.html"을, "/css/index.css" 요청은 "static/css/index.css" 파일을 반환합니다.
 	http.Handle("/", http.FileServer(http.Dir("./static")))

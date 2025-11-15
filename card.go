@@ -8,18 +8,16 @@ import (
 	"strings"
 )
 
-// Card 구조체 (DB 스키마에 맞춰 정의)
 type Card struct {
 	CardID    int64  `json:"id"`
 	Text      string `json:"cardtext"`
 	URL       string `json:"cardurl"`
 	Tags      string `json:"cardtags"`
-	Category  string `json:"category,omitempty"` // 클러스터링을 위한 카테고리 필드
+	Category  string `json:"category,omitempty"`
 	ProjectID int64  `json:"project_id"`
 	UserID    int64  `json:"user_id,omitempty"` // 서버에서 채우므로 클라이언트 요청에는 불필요
 }
 
-// handleCards는 카드의 CRUD 작업을 처리하는 핸들러입니다.
 // /api/cards 와 /api/cards/{id} 경로의 요청을 처리합니다.
 func handleCards(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value(userContextKey).(int64)
@@ -28,7 +26,6 @@ func handleCards(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// /api/cards/ 또는 /api/cards/{id} 에서 id 부분을 추출
 	path := strings.TrimPrefix(r.URL.Path, "/api/cards")
 	idFromPath := ""
 	if strings.HasPrefix(path, "/") {
@@ -39,7 +36,6 @@ func handleCards(w http.ResponseWriter, r *http.Request) {
 	case "POST":
 		createCard(w, r, userID)
 	case "GET":
-		// id가 있으면 특정 카드 조회, 없으면 프로젝트의 카드 목록 조회
 		if idFromPath != "" {
 			getCard(w, r, userID, idFromPath)
 		} else {
@@ -61,9 +57,8 @@ func createCard(w http.ResponseWriter, r *http.Request, userID int64) {
 		return
 	}
 	card.UserID = userID
-	card.Category = "미분류" // 기본 카테고리 설정
+	card.Category = "미분류"
 
-	// 사용자가 해당 프로젝트의 소유자인지 확인
 	var projectOwnerID int64
 	err := db.QueryRow("SELECT user_id FROM projects WHERE id = ?", card.ProjectID).Scan(&projectOwnerID)
 	if err != nil || projectOwnerID != userID {
@@ -73,11 +68,9 @@ func createCard(w http.ResponseWriter, r *http.Request, userID int64) {
 
 	// 태그가 비어있을 경우, AI 서버를 호출하여 자동 생성
 	if card.Tags == "" && card.Text != "" {
-		// AI 서버에 보낼 요청 본문 생성
 		reqBody := map[string]string{"content": card.Text}
 		reqBytes, err := json.Marshal(reqBody)
 		if err == nil {
-			// AI 서버에 POST 요청
 			resp, err := http.Post("http://127.0.0.1:8000/tags/generate", "application/json", bytes.NewBuffer(reqBytes))
 			if err == nil {
 				defer resp.Body.Close()
@@ -127,7 +120,6 @@ func getCardsByProject(w http.ResponseWriter, r *http.Request, userID int64) {
 		return
 	}
 
-	// 사용자가 해당 프로젝트의 소유자인지 확인
 	var projectOwnerID int64
 	err = db.QueryRow("SELECT user_id FROM projects WHERE id = ?", projectID).Scan(&projectOwnerID)
 	if err != nil || projectOwnerID != userID {

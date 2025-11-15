@@ -1,4 +1,3 @@
-// document.go
 package main
 
 import (
@@ -12,8 +11,6 @@ import (
 	"strings"
 	"time"
 )
-
-// --- AI 서버 연동을 위한 구조체 정의 ---
 
 // AgentInvokeRequest는 AI 서버 /agent/invoke 엔드포인트에 보낼 요청 본문입니다.
 type AgentInvokeRequest struct {
@@ -40,7 +37,6 @@ type AgentInvokeResponse struct {
 	Report string `json:"report"`
 }
 
-// Document 구조체 (DB 스키마 기반)
 type Document struct {
 	ID        int64     `json:"id"`
 	Title     string    `json:"title"`
@@ -51,7 +47,6 @@ type Document struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
-// handleDocuments는 문서의 CRUD 작업을 처리합니다.
 func handleDocuments(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value(userContextKey).(int64)
 	if !ok {
@@ -64,7 +59,7 @@ func handleDocuments(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case "POST":
-		createDocumentWithAI(w, r, userID) // 기존 createDocument 대신 호출
+		createDocumentWithAI(w, r, userID)
 	case "GET":
 		if idFromPath != "" {
 			getDocument(w, r, userID, idFromPath)
@@ -79,8 +74,6 @@ func handleDocuments(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "지원하지 않는 메소드", http.StatusMethodNotAllowed)
 	}
 }
-
-// --- AI 서버 연동을 위한 데이터 조회 함수들 ---
 
 func getAllCardsForProject(projectID int64, userID int64) ([]CardForAI, error) {
 	query := `SELECT id, cardtext FROM cards WHERE project_id = ? AND user_id = ?`
@@ -115,7 +108,6 @@ func getAllTagsForProject(projectID int64, userID int64) ([]string, error) {
 		if err := rows.Scan(&tagsStr); err != nil {
 			return nil, err
 		}
-		// 쉼표로 구분된 태그 문자열을 개별 태그로 분리
 		tags := strings.Split(tagsStr, ",")
 		for _, tag := range tags {
 			trimmedTag := strings.TrimSpace(tag)
@@ -125,7 +117,6 @@ func getAllTagsForProject(projectID int64, userID int64) ([]string, error) {
 		}
 	}
 
-	// 맵의 키를 사용하여 중복이 제거된 태그 목록 생성
 	uniqueTags := make([]string, 0, len(tagSet))
 	for tag := range tagSet {
 		uniqueTags = append(uniqueTags, tag)
@@ -160,7 +151,6 @@ func getAllCategoriesForProject(projectID int64, userID int64) ([]CategoryInfo, 
 	return categories, nil
 }
 
-// createDocumentWithAI는 AI 서버를 호출하여 문서 초안을 생성합니다.
 func createDocumentWithAI(w http.ResponseWriter, r *http.Request, userID int64) {
 	var doc Document
 	if err := json.NewDecoder(r.Body).Decode(&doc); err != nil {
@@ -169,7 +159,6 @@ func createDocumentWithAI(w http.ResponseWriter, r *http.Request, userID int64) 
 	}
 	doc.UserID = userID
 
-	// 1. 프로젝트 소유권 확인
 	var projectOwnerID int64
 	err := db.QueryRow("SELECT user_id FROM projects WHERE id = ?", doc.ProjectID).Scan(&projectOwnerID)
 	if err != nil || projectOwnerID != userID {
@@ -177,7 +166,6 @@ func createDocumentWithAI(w http.ResponseWriter, r *http.Request, userID int64) 
 		return
 	}
 
-	// 2. AI 서버에 보낼 데이터 수집
 	allCards, err := getAllCardsForProject(doc.ProjectID, userID)
 	if err != nil {
 		http.Error(w, "카드 정보 조회 실패: "+err.Error(), http.StatusInternalServerError)
@@ -194,7 +182,6 @@ func createDocumentWithAI(w http.ResponseWriter, r *http.Request, userID int64) 
 		return
 	}
 
-	// 3. AI 서버에 요청
 	aiRequestData := AgentInvokeRequest{
 		Topic:         doc.Title,
 		AllTags:       allTags,
@@ -227,9 +214,8 @@ func createDocumentWithAI(w http.ResponseWriter, r *http.Request, userID int64) 
 		http.Error(w, "AI 서버 응답 파싱 실패", http.StatusInternalServerError)
 		return
 	}
-	doc.Content = aiResponse.Report // AI가 생성한 내용으로 교체
+	doc.Content = aiResponse.Report
 
-	// 4. DB에 새 문서 저장
 	query := "INSERT INTO documents (title, content, project_id, user_id) VALUES (?, ?, ?, ?)"
 	result, err := db.Exec(query, doc.Title, doc.Content, doc.ProjectID, doc.UserID)
 	if err != nil {
@@ -244,7 +230,6 @@ func createDocumentWithAI(w http.ResponseWriter, r *http.Request, userID int64) 
 	}
 	doc.ID = docID
 
-	// 5. 생성된 전체 문서 정보 반환
 	err = db.QueryRow("SELECT created_at, updated_at FROM documents WHERE id = ?", docID).Scan(&doc.CreatedAt, &doc.UpdatedAt)
 	if err != nil {
 		http.Error(w, "생성된 문서 정보 조회 실패", http.StatusInternalServerError)

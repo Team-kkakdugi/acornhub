@@ -1,36 +1,27 @@
-// project.js
-
 document.addEventListener("DOMContentLoaded", () => {
-  // --- API Endpoints ---
   const CARDS_API_URL = "/api/cards/";
   const PROJECTS_API_URL = "/api/projects/";
   const DOCUMENTS_API_URL = "/api/documents/";
   const CLUSTER_API_URL = "/api/projects/cluster";
 
-  // --- DOM 요소 ---
   const projectNameEl = document.getElementById("project-name");
   const cardGridEl = document.getElementById("card-grid");
   const addDocumentBtn = document.getElementById("add-document-btn");
   const clusterBtn = document.getElementById("cluster-btn");
 
-  // 사이드바 뷰 컨테이너
   const listContainer = document.getElementById("document-list-container");
   const detailContainer = document.getElementById("document-detail-container");
   const documentListEl = document.getElementById("document-list");
 
-  // 모달 요소
   const modalContainer = document.getElementById("card-modal");
   const modalCardText = document.getElementById("modal-card-text");
   const modalCloseBtn = modalContainer.querySelector(".modal-close-btn");
   const modalOverlay = modalContainer.querySelector(".modal-overlay");
 
-  // --- 상태 관리 ---
   let projectId = null;
   let projectDesc = "";
   let documents = [];
   let cards = [];
-
-  /* ---------------- 데이터 로드 및 렌더링 ---------------- */
 
   function getProjectIdFromUrl() {
     const params = new URLSearchParams(window.location.search);
@@ -92,9 +83,8 @@ document.addEventListener("DOMContentLoaded", () => {
     await fetchDocuments(projectId);
   }
 
-  // 카드 목록 렌더링 (메인 콘텐츠) - 카테고리별 그룹화
   function renderCards() {
-    cardGridEl.innerHTML = ""; // 기존 내용 비우기
+    cardGridEl.innerHTML = "";
 
     if (projectDesc) {
       const descEl = document.createElement("div");
@@ -103,7 +93,6 @@ document.addEventListener("DOMContentLoaded", () => {
       cardGridEl.appendChild(descEl);
     }
 
-    // 1. 카드를 카테고리별로 그룹화
     const groupedCards = cards.reduce((acc, card) => {
       const category = card.category || "미분류";
       if (!acc[category]) {
@@ -113,14 +102,12 @@ document.addEventListener("DOMContentLoaded", () => {
       return acc;
     }, {});
 
-    // 2. 카테고리 순서 정렬 ('미분류'를 맨 뒤로)
     const sortedCategories = Object.keys(groupedCards).sort((a, b) => {
       if (a === "미분류") return 1;
       if (b === "미분류") return -1;
       return a.localeCompare(b);
     });
 
-    // 3. 각 카테고리별로 섹션 렌더링
     sortedCategories.forEach((category) => {
       const categorySection = document.createElement("div");
       categorySection.className = "category-section";
@@ -134,7 +121,6 @@ document.addEventListener("DOMContentLoaded", () => {
       innerGrid.className = "card-grid-inner";
       categorySection.appendChild(innerGrid);
 
-      // 해당 카테고리의 카드들 렌더링
       groupedCards[category].forEach((card) => {
         const cardEl = createCardElement(card);
         innerGrid.appendChild(cardEl);
@@ -143,12 +129,10 @@ document.addEventListener("DOMContentLoaded", () => {
       cardGridEl.appendChild(categorySection);
     });
 
-    // 새 카드 추가 버튼은 항상 최상위 그리드에 추가
     const addCardEl = createCardElement(null, true);
     cardGridEl.appendChild(addCardEl);
   }
 
-  // 카드 DOM 요소를 생성하는 헬퍼 함수
   function createCardElement(card, isAddButton = false) {
     if (isAddButton) {
       const addCardEl = document.createElement("div");
@@ -194,9 +178,6 @@ document.addEventListener("DOMContentLoaded", () => {
     return cardEl;
   }
 
-
-  /* ---------------- 모달 관련 함수 ---------------- */
-
   function openCardModal(card) {
     modalCardText.textContent = card.cardtext;
     modalContainer.style.display = "flex";
@@ -206,8 +187,6 @@ document.addEventListener("DOMContentLoaded", () => {
     modalContainer.style.display = "none";
     modalCardText.textContent = "";
   }
-
-  /* ---------------- 사이드바 (문서) 뷰 전환 로직 ---------------- */
 
   function showListView() {
     detailContainer.style.display = "none";
@@ -232,7 +211,6 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
     detailContainer.style.display = "flex";
 
-    // iframe에 컨텐츠 삽입
     const iframe = detailContainer.querySelector('.document-content-iframe');
     const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
     iframeDoc.open();
@@ -306,8 +284,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  /* ---------------- 이벤트 핸들러 ---------------- */
-
   async function handleClusterCards() {
     if (!confirm("카드를 자동으로 분류할까요? 기존 카테고리 정보는 사라집니다.")) return;
 
@@ -325,7 +301,6 @@ document.addEventListener("DOMContentLoaded", () => {
         throw new Error(`클러스터링 실패: ${errorText}`);
       }
 
-      // 성공 후 데이터 다시 로드 및 렌더링
       await fetchCards(projectId);
       renderCards();
 
@@ -346,7 +321,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!addCardEl) return;
 
     const originalContent = addCardEl.innerHTML;
-    addCardEl.style.pointerEvents = "none"; // 클릭 방지
+    addCardEl.style.pointerEvents = "none";
     addCardEl.innerHTML = `<div class="card-name">AI 태그 생성 중...</div>`;
 
     try {
@@ -366,13 +341,12 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       
       const newCard = await response.json();
-      cards.push(newCard); // 배열에 추가
-      renderCards(); // 성공 시, 전체를 다시 렌더링하여 버튼을 자동으로 복구합니다.
+      cards.push(newCard);
+      renderCards();
 
     } catch (error) {
       console.error(error);
       alert(error.message);
-      // 실패 시, 버튼을 수동으로 복구합니다.
       if (addCardEl) {
         addCardEl.innerHTML = originalContent;
         addCardEl.style.pointerEvents = "auto";
@@ -429,15 +403,13 @@ document.addEventListener("DOMContentLoaded", () => {
       
       const newDocument = await response.json();
       documents.unshift(newDocument);
-      // 새 문서가 생성되면 바로 상세 뷰를 보여줍니다.
-      renderDocumentList(); // 목록을 다시 렌더링하여 새 문서를 반영
+      renderDocumentList();
       showDetailView(newDocument.id);
 
     } catch (error) {
       console.error(error);
       alert(error.message);
     } finally {
-      // 성공하든 실패하든 버튼 상태를 원상 복구
       addDocumentBtn.disabled = false;
       addDocumentBtn.textContent = originalButtonText;
     }
@@ -465,8 +437,6 @@ document.addEventListener("DOMContentLoaded", () => {
       alert(error.message);
     }
   }
-
-  /* ---------------- 초기화 ---------------- */
 
   async function init() {
     projectId = getProjectIdFromUrl();

@@ -101,7 +101,6 @@ func handleProjects(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// 기존의 모든 프로젝트 조회 또는 검색 로직
 		searchQuery := r.URL.Query().Get("q")
 
 		var rows *sql.Rows
@@ -117,7 +116,6 @@ func handleProjects(w http.ResponseWriter, r *http.Request) {
 			`
 			rows, err = db.Query(query, userID, "%"+searchTerm+"%")
 		} else {
-			// 검색어가 없는 경우: 모든 프로젝트 조회
 			query := "SELECT id, projectname, projectdesc, user_id FROM projects WHERE user_id = ?"
 			rows, err = db.Query(query, userID)
 		}
@@ -221,7 +219,6 @@ func handleProjects(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// only allow owner to update
 		result, err := db.Exec(
 			"UPDATE projects SET projectname = ?, projectdesc = ? WHERE id = ? AND user_id = ?",
 			project.Name, project.Desc, id64, userID,
@@ -241,7 +238,6 @@ func handleProjects(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// respond with updated project
 		project.Projectid = id64
 		project.Userid = userID
 		w.Header().Set("Content-Type", "application/json")

@@ -1,10 +1,7 @@
-// dashboard.js
-
-// 실제 백엔드 주소
 const API_BASE_URL = "https://oli.tailda0655.ts.net";
-const PROJECT_LIST_URL = `${API_BASE_URL}/api/projects/`;   // 목록/생성 (슬래시 추가)
-const PROJECT_DELETE_URL = `${API_BASE_URL}/api/projects/`;  // 삭제 (URL에 ID 추가 필요)
-const PROJECT_SEARCH_URL = `${API_BASE_URL}/api/projects/`; // 검색 (슬래시 추가)
+const PROJECT_LIST_URL = `${API_BASE_URL}/api/projects/`;
+const PROJECT_DELETE_URL = `${API_BASE_URL}/api/projects/`;
+const PROJECT_SEARCH_URL = `${API_BASE_URL}/api/projects/`;
 const LOGOUT_URL = `${API_BASE_URL}/auth/logout`;
 const ME_URL = `${API_BASE_URL}/api/me`;
 
@@ -12,25 +9,19 @@ const logoutBtn = document.getElementById("logout-btn");
 const addFolderCard = document.getElementById("add-folder-card");
 const folderList = document.getElementById("folder-list");
 
-// 사이드바 요소
 const sidebar = document.getElementById("sidebar");
 const sidebarToggle = document.getElementById("sidebar-toggle");
 const sidebarProjectList = document.getElementById("sidebar-project-list");
 const addPageBtn = document.getElementById("add-page-btn");
 const userNameLabel = document.getElementById("user-name-label");
 
-// 상단 검색창
 const searchInput = document.getElementById("project-search-input");
 
-// 프론트에서 들고 있을 프로젝트 목록
 let projects = [];
-
-/* ---------------- 사이드바 토글 ---------------- */
 
 if (sidebarToggle && sidebar) {
   sidebarToggle.addEventListener("click", () => {
     sidebar.classList.toggle("collapsed");
-    // 아이콘 변경
     if (sidebar.classList.contains("collapsed")) {
       sidebarToggle.textContent = "›";
     } else {
@@ -38,8 +29,6 @@ if (sidebarToggle && sidebar) {
     }
   });
 }
-
-/* ---------------- 유저 이름 불러오기 ---------------- */
 
 async function fetchMeAndSetName() {
   if (!userNameLabel) return;
@@ -70,8 +59,6 @@ async function fetchMeAndSetName() {
   }
 }
 
-/* ---------------- 로그아웃 ---------------- */
-
 if (logoutBtn) {
   logoutBtn.addEventListener("click", async () => {
     try {
@@ -86,8 +73,6 @@ if (logoutBtn) {
     }
   });
 }
-
-/* ---------------- 프로젝트 목록 불러오기 (전체) ---------------- */
 
 async function fetchProjects() {
   console.log("=== fetchProjects 시작 ===");
@@ -154,8 +139,6 @@ async function fetchProjects() {
   }
 }
 
-/* ---------------- 프로젝트 검색 ---------------- */
-
 async function searchProjects(keyword) {
   const query = keyword.trim();
   const addFolderCard = document.getElementById("add-folder-card");
@@ -197,8 +180,6 @@ async function searchProjects(keyword) {
   }
 }
 
-/* ---------------- 이름 중복 체크 ---------------- */
-
 function isDuplicateFolderName(name) {
   console.log("중복 체크 - 입력된 이름:", name);
   console.log("중복 체크 - 현재 projects:", projects);
@@ -223,26 +204,20 @@ function isDuplicateFolderName(name) {
   return isDuplicate;
 }
 
-/* ---------------- 폴더 카드 생성 ---------------- */
-
 function createFolderCard(project) {
   const card = document.createElement("div");
   card.className = "folder-card";
   card.dataset.id = project.projectid;
 
-  // CSS로 만든 폴더 (div)
   const folderDiv = document.createElement("div");
   folderDiv.className = "folder-image";
 
-  // 이름 - 폴더 안에 넣기
   const nameEl = document.createElement("div");
   nameEl.className = "folder-name";
   nameEl.textContent = project.projectname;
   
-  // 폴더 안에 이름 추가
   folderDiv.appendChild(nameEl);
 
-  // 삭제 버튼
   const deleteBtn = document.createElement("button");
   deleteBtn.type = "button";
   deleteBtn.className = "folder-delete-button";
@@ -253,7 +228,6 @@ function createFolderCard(project) {
     handleDeleteProject(project);
   });
 
-  // 카드 클릭 시 상세 페이지로 이동
   card.addEventListener("click", () => {
     if (project && project.projectid) {
       window.location.href = `/project.html?id=${project.projectid}`;
@@ -269,8 +243,6 @@ function createFolderCard(project) {
   return card;
 }
 
-/* ---------------- 메인 영역 프로젝트 렌더링 ---------------- */
-
 function renderProjects() {
   folderList.innerHTML = "";
   projects.forEach((project) => {
@@ -278,8 +250,6 @@ function renderProjects() {
     folderList.appendChild(card);
   });
 }
-
-/* ---------------- 사이드바 프로젝트 리스트 렌더링 ---------------- */
 
 function renderSidebarProjects() {
   if (!sidebarProjectList) return;
@@ -299,8 +269,6 @@ function renderSidebarProjects() {
     sidebarProjectList.appendChild(btn);
   });
 }
-
-/* ---------------- 프로젝트 생성 ---------------- */
 
 async function handleCreateProject() {
   console.log("=== handleCreateProject 함수 시작 ===");
@@ -324,7 +292,6 @@ async function handleCreateProject() {
     return;
   }
 
-  // 두 번째 입력: 프로젝트 주제
   let desc = prompt("프로젝트의 설명을 적어주세요.");
   console.log("입력받은 설명:", desc);
   
@@ -410,8 +377,6 @@ async function handleCreateProject() {
   }
 }
 
-/* ---------------- 프로젝트 삭제 ---------------- */
-
 async function handleDeleteProject(project) {
   const ok = confirm(`'${project.projectname}' 프로젝트를 삭제할까요?`);
   if (!ok) return;
@@ -448,8 +413,6 @@ async function handleDeleteProject(project) {
     alert("프로젝트를 삭제하는 중 오류가 발생했어요.");
   }
 }
-
-/* ---------------- 초기화 ---------------- */
 
 document.addEventListener("DOMContentLoaded", () => {
   fetchMeAndSetName();

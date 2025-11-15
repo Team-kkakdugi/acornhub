@@ -1,7 +1,3 @@
-# ai_server.py
-# FastAPI를 사용한 AI 모델 서버
-
-# --- 1. 라이브러리 임포트 ---
 import os
 import re
 import json
@@ -23,16 +19,11 @@ from konlpy.tag import Okt
 from keybert import KeyBERT
 from transformers import pipeline
 
-# --- 2. 기본 설정 및 경고 무시 ---
 warnings.filterwarnings("ignore", category=FutureWarning)
-load_dotenv() # .env 파일에서 환경 변수 로드
+load_dotenv()
 
-# --- 3. FastAPI 앱 및 데이터 모델 정의 ---
 app = FastAPI()
 
-# --- API 요청/응답을 위한 Pydantic 모델 ---
-
-# 기능 1: 자동 군집화
 class Card(BaseModel):
     id: int
     content: str
@@ -47,14 +38,12 @@ class ClusterInfo(BaseModel):
 class ClusterResponse(BaseModel):
     clusters: List[ClusterInfo]
 
-# 기능 2: AI 태그 생성
 class TagGenerationRequest(BaseModel):
     content: str
 
 class TagGenerationResponse(BaseModel):
     tags: List[str]
 
-# 기능 3: AI 문서 초안 작성
 class CategoryInfo(BaseModel):
     category_name: str
     card_ids: List[int]
@@ -63,13 +52,11 @@ class AgentInvokeRequest(BaseModel):
     topic: str
     all_tags: List[str]
     all_categories: List[CategoryInfo]
-    # Go 백엔드에서 카드 내용을 함께 전달하도록 API 명세 변경을 가정
     all_cards: List[Card]
 
 class AgentInvokeResponse(BaseModel):
     report: str
 
-# --- 4. 모델 로딩 및 전역 변수 ---
 models = {}
 claude_client = None
 
@@ -79,7 +66,6 @@ def load_models():
     global claude_client
     print("--- AI 모델 로딩 시작 ---")
     try:
-        # Gemini 클라이언트 초기화 (기존 버전 호환 방식)
         gemini_api_key = os.getenv("GEMINI_API_KEY")
         if gemini_api_key:
             models['gemini_client'] = genai.Client(api_key=gemini_api_key)
@@ -88,7 +74,6 @@ def load_models():
             print("경고: GEMINI_API_KEY가 없어 Gemini 관련 기능이 제한됩니다.")
             models['gemini_client'] = None
 
-        # Anthropic (Claude) 클라이언트 초기화
         anthropic_api_key = os.getenv("ANTHROPIC_API_KEY")
         if anthropic_api_key:
             claude_client = anthropic.Anthropic(api_key=anthropic_api_key)
@@ -96,7 +81,6 @@ def load_models():
         else:
             print("경고: ANTHROPIC_API_KEY가 없어 Claude 관련 기능이 제한됩니다.")
 
-        # 기타 ML 모델 로드
         models['okt'] = Okt()
         print("Okt 형태소 분석기 초기화 완료.")
         models['keybert'] = KeyBERT('distiluse-base-multilingual-cased')
@@ -109,9 +93,6 @@ def load_models():
         print(f"모델 로딩 중 치명적인 오류 발생: {e}")
         raise e
 
-# --- 5. AI 기능별 헬퍼 함수 ---
-
-# 기능 2: 태그 생성 헬퍼
 def get_tags_by_frequency(text, n_tags=20):
     nouns = models['okt'].nouns(re.sub(r'[^가-힣A-Za-z0-9\s]', '', text))
     return [n for n, c in Counter(n for n in nouns if len(n) > 1).most_common(n_tags)]
@@ -127,7 +108,6 @@ def get_tags_by_okt_phrases(text, n_tags=20):
 def get_tags_by_ner(text):
     return [entity['word'].replace(" ", "") for entity in models['ner_pipeline'](text)]
 
-# 기능 1: 클러스터링 헬퍼
 def get_embeddings(texts: List[str]):
     gemini_client = models.get('gemini_client')
     if not gemini_client:
@@ -173,8 +153,6 @@ def name_clusters_with_llm(grouped_texts: Dict[int, List[str]]):
             cluster_names[cluster_id] = f"카테고리 {cluster_id}"
     
     return cluster_names
-
-# --- 6. API 엔드포인트 구현 ---
 
 @app.post("/tags/generate", response_model=TagGenerationResponse)
 async def generate_tags(request: TagGenerationRequest):
@@ -243,7 +221,6 @@ async def cluster_cards(request: ClusterRequest):
     response_data = [{"category_name": name, "card_ids": ids} for name, ids in final_clusters_map.items()]
     return {"clusters": response_data}
 
-# --- 기능 3: AI 문서 초안 작성 로직 ---
 card_db_for_agent = {}
 
 def search_cards_for_agent(categories: list[str], all_categories: List[Dict]) -> list[dict]:
@@ -262,7 +239,6 @@ def search_cards_for_agent(categories: list[str], all_categories: List[Dict]) ->
 async def invoke_agent(request: AgentInvokeRequest):
     if not claude_client: raise HTTPException(status_code=503, detail="Claude 모델이 로드되지 않았습니다.")
 
-    # 요청 시 받은 카드 목록으로 내부 DB를 채움
     global card_db_for_agent
     card_db_for_agent = {card.id: card.content for card in request.all_cards}
 
@@ -311,7 +287,6 @@ async def invoke_agent(request: AgentInvokeRequest):
         print(f"Claude 에이전트 실행 중 오류: {e}")
         raise HTTPException(status_code=500, detail=f"AI 에이전트 실행 중 오류 발생: {e}")
 
-# --- 7. 서버 실행 ---
 if __name__ == "__main__":
     print("AI 서버를 시작합니다. http://127.0.0.1:8000 에서 실행됩니다.")
     uvicorn.run(app, host="0.0.0.0", port=8000)
