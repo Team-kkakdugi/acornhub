@@ -2,7 +2,7 @@
 
 // 실제 백엔드 주소
 const API_BASE_URL = "https://oli.tailda0655.ts.net";
-const PROJECT_API_URL = `${API_BASE_URL}/api/project`;
+const PROJECT_API_URL = `${API_BASE_URL}/api/projects`;
 const LOGOUT_URL = `${API_BASE_URL}/auth/logout`;
 
 const logoutBtn = document.getElementById("logout-btn");
