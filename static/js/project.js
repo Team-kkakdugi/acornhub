@@ -26,6 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // --- 상태 관리 ---
   let projectId = null;
+  let projectDesc = "";
   let documents = [];
   let cards = [];
 
@@ -46,6 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       const project = await response.json();
       projectNameEl.textContent = project.projectname || "Unnamed Project";
+      projectDesc = project.projectdesc || "";
     } catch (error) {
       console.error("Error fetching project details:", error);
       projectNameEl.textContent = "프로젝트를 찾을 수 없습니다.";
@@ -93,6 +95,13 @@ document.addEventListener("DOMContentLoaded", () => {
   // 카드 목록 렌더링 (메인 콘텐츠) - 카테고리별 그룹화
   function renderCards() {
     cardGridEl.innerHTML = ""; // 기존 내용 비우기
+
+    if (projectDesc) {
+      const descEl = document.createElement("div");
+      descEl.className = "project-description";
+      descEl.textContent = projectDesc;
+      cardGridEl.appendChild(descEl);
+    }
 
     // 1. 카드를 카테고리별로 그룹화
     const groupedCards = cards.reduce((acc, card) => {
@@ -202,7 +211,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function showListView() {
     detailContainer.style.display = "none";
-    listContainer.style.display = "block";
+    listContainer.style.display = "flex";
     renderDocumentList();
   }
 
@@ -219,11 +228,47 @@ document.addEventListener("DOMContentLoaded", () => {
       <div class="document-detail-header">
         <button class="btn-text" id="back-to-list-btn">&larr; 목록으로 돌아가기</button>
       </div>
-      <div class="document-content">
-        ${doc.content}
-      </div>
+      <iframe class="document-content-iframe" frameborder="0"></iframe>
     `;
-    detailContainer.style.display = "block";
+    detailContainer.style.display = "flex";
+
+    // iframe에 컨텐츠 삽입
+    const iframe = detailContainer.querySelector('.document-content-iframe');
+    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+    iframeDoc.open();
+    iframeDoc.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <style>
+          body {
+            margin: 0;
+            padding: 1.5rem;
+            font-family: "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.7;
+            color: #8c7b70;
+          }
+          h1, h2, h3, h4, h5, h6 {
+            color: #4d423a;
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+          }
+          h2 {
+            font-size: 1.8rem;
+            margin-top: 0;
+          }
+          p {
+            margin-bottom: 1rem;
+          }
+        </style>
+      </head>
+      <body>
+        ${doc.content}
+      </body>
+      </html>
+    `);
+    iframeDoc.close();
 
     document
       .getElementById("back-to-list-btn")
@@ -243,7 +288,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const deleteBtn = document.createElement("button");
       deleteBtn.className = "btn-delete-doc";
-      deleteBtn.textContent = "–";
+      deleteBtn.textContent = "-";
       deleteBtn.title = "문서 삭제";
 
       titleEl.addEventListener("click", () => {
@@ -297,6 +342,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const text = prompt("새 카드의 내용을 입력하세요.");
     if (!text || text.trim() === "") return;
 
+    const addCardEl = document.querySelector(".card-add");
+    if (!addCardEl) return;
+
+    const originalContent = addCardEl.innerHTML;
+    addCardEl.style.pointerEvents = "none"; // 클릭 방지
+    addCardEl.innerHTML = `<div class="card-name">AI 태그 생성 중...</div>`;
+
     try {
       const response = await fetch(CARDS_API_URL, {
         method: "POST",
@@ -315,11 +367,16 @@ document.addEventListener("DOMContentLoaded", () => {
       
       const newCard = await response.json();
       cards.push(newCard); // 배열에 추가
-      renderCards(); // 전체 다시 렌더링
+      renderCards(); // 성공 시, 전체를 다시 렌더링하여 버튼을 자동으로 복구합니다.
 
     } catch (error) {
       console.error(error);
       alert(error.message);
+      // 실패 시, 버튼을 수동으로 복구합니다.
+      if (addCardEl) {
+        addCardEl.innerHTML = originalContent;
+        addCardEl.style.pointerEvents = "auto";
+      }
     }
   }
 
@@ -350,6 +407,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const title = prompt("새 문서의 제목을 입력하세요.");
     if (!title || title.trim() === "") return;
 
+    const originalButtonText = addDocumentBtn.textContent;
+    addDocumentBtn.disabled = true;
+    addDocumentBtn.textContent = "AI 초안 생성 중...";
+
     try {
       const response = await fetch(DOCUMENTS_API_URL, {
         method: "POST",
@@ -368,11 +429,17 @@ document.addEventListener("DOMContentLoaded", () => {
       
       const newDocument = await response.json();
       documents.unshift(newDocument);
+      // 새 문서가 생성되면 바로 상세 뷰를 보여줍니다.
+      renderDocumentList(); // 목록을 다시 렌더링하여 새 문서를 반영
       showDetailView(newDocument.id);
 
     } catch (error) {
       console.error(error);
       alert(error.message);
+    } finally {
+      // 성공하든 실패하든 버튼 상태를 원상 복구
+      addDocumentBtn.disabled = false;
+      addDocumentBtn.textContent = originalButtonText;
     }
   }
 

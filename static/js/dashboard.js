@@ -63,7 +63,6 @@ async function fetchMeAndSetName() {
     const data = await res.json();
     console.log("[GET /api/me] response:", data);
 
-    // API 응답: user_name 또는 github_username
     const name = data.user_name || data.github_username || "사용자";
     userNameLabel.textContent = name;
   } catch (err) {
@@ -116,7 +115,6 @@ async function fetchProjects() {
       return;
     }
 
-    // 응답 텍스트 먼저 확인
     const responseText = await res.text();
     console.log("[GET /api/projects] response text:", responseText);
     
@@ -133,7 +131,6 @@ async function fetchProjects() {
     console.log("[GET /api/projects] response 타입:", typeof data);
     console.log("[GET /api/projects] 배열인가?", Array.isArray(data));
 
-    // API 응답이 배열로 온다고 가정
     if (Array.isArray(data)) {
       projects = data;
     } else if (data === null || data === undefined) {
@@ -164,13 +161,11 @@ async function searchProjects(keyword) {
   const addFolderCard = document.getElementById("add-folder-card");
   
   if (!query) {
-    // 검색어가 없으면 전체 목록 표시하고 버튼 보이기
     if (addFolderCard) addFolderCard.style.display = "flex";
     fetchProjects();
     return;
   }
 
-  // 검색 중일 때는 새 프로젝트 버튼 숨기기
   if (addFolderCard) addFolderCard.style.display = "none";
 
   try {
@@ -396,7 +391,6 @@ async function handleCreateProject() {
       console.log("[POST /api/projects] 응답 키들:", Object.keys(created || {}));
     }
 
-    // 응답이 없거나 비어있거나 projectid가 없는 경우
     if (!created || !created.projectid) {
       console.warn("서버 응답이 없거나 projectid가 없습니다.");
       console.warn("받은 응답:", created);
@@ -405,7 +399,6 @@ async function handleCreateProject() {
       return;
     }
 
-    // 정상적인 경우
     console.log("=== 프로젝트를 배열에 추가하고 렌더링 ===");
     projects.unshift(created);
     renderProjects();
@@ -424,7 +417,6 @@ async function handleDeleteProject(project) {
   if (!ok) return;
 
   try {
-    // API 명세서: DELETE /api/projects/{id}
     const deleteUrl = `${PROJECT_DELETE_URL}${project.projectid}`;
     console.log("삭제 요청 URL:", deleteUrl);
     
@@ -447,7 +439,6 @@ async function handleDeleteProject(project) {
       return;
     }
 
-    // 로컬 배열에서 제거
     projects = projects.filter((p) => p.projectid !== project.projectid);
     renderProjects();
     renderSidebarProjects();

@@ -281,16 +281,12 @@ body {
   padding: 32px 18%;
 }
 
-/* 새 폴더 버튼 1줄 + 그 아래 폴더들이 가로로 배치되는 영역 */
-
 .folder-section {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
   gap: 40px;
 }
-
-/* 새 폴더 추가 버튼 - CSS로 폴더 모양 만들기 */
 
 .folder-add-button {
   background: #F5F1EE;
@@ -329,13 +325,9 @@ body {
   line-height: 1;
 }
 
-/* 폴더들이 생기는 영역 (아래 줄) */
-
 .folder-list {
   display: contents;
 }
-
-/* 폴더 카드 */
 
 .folder-card {
   position: relative;
@@ -348,7 +340,6 @@ body {
   padding: 0;
 }
 
-/* 폴더 이미지를 CSS로 만들기 */
 .folder-image {
   width: 200px;
   height: 160px;
@@ -359,7 +350,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding-top: 120px; /* 상단 75% 영역만큼 밀어내기 (160px * 0.75 = 120px) */
+  padding-top: 120px;
   transition: all 0.3s ease;
   position: relative;
 }
@@ -369,7 +360,6 @@ body {
   transform: translateY(-4px);
 }
 
-/* 폴더 이름 - 갈색 부분 안에 배치 */
 .folder-name {
   font-size: 0.95rem;
   color: #FEFEFE;
@@ -380,8 +370,6 @@ body {
   text-align: center;
   font-weight: 700;
 }
-
-/* 삭제 버튼 (X) */
 
 .folder-delete-button {
   position: absolute;
