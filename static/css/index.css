@@ -1,0 +1,224 @@
+/* 기본 설정 */
+* {
+  box-sizing: border-box;
+}
+
+:root {
+  --page-padding-desktop: 80px;
+  --page-padding-tablet: 40px;
+  --page-padding-mobile: 20px;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background-color: #ffffff;
+  color: #222;
+}
+
+/* 상단 네비게이션 */
+.top-nav {
+  border-bottom: 1px solid #e5e5e5;
+  background-color: #ffffff;
+}
+
+.top-nav-inner {
+  width: 100%;
+  margin: 0;
+  padding: 16px var(--page-padding-desktop);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+}
+
+/* 로고 */
+.logo-placeholder {
+  width: 48px;
+  height: 48px;
+  background-color: #d9d9d9; /* 필요 없으면 나중에 삭제해도 됨 */
+  overflow: hidden;           /* 이미지 튀어나가지 않게 */
+  border-radius: 8px;         /* 살짝 둥글게 (원하면) */
+}
+
+/* 로고 이미지 꽉 채우기 */
+.logo-placeholder img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;          /* 이미지 비율 유지하면서 꽉 채우기 */
+  display: block;
+}
+
+/* 헤더 중앙 텍스트 로고 */
+.brand-name {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 28px;
+  font-weight: 700;
+}
+
+/* 로그인 버튼 */
+.btn-login {
+  padding: 9px 24px;
+  border-radius: 999px;
+  border: none;
+  background-color: #8c6239;
+  color: #ffffff;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.btn-login:hover {
+  opacity: 0.9;
+}
+
+/* 히어로 섹션 */
+.hero {
+  background-color: #ffffff;
+  min-height: calc(100vh - 70px);
+  display: flex;
+  align-items: flex-start;
+}
+
+.hero-inner {
+  width: 100%;
+  margin: 0;
+  padding: 40px var(--page-padding-desktop) 80px;
+}
+
+.hero-title {
+  font-size: 42px;
+  font-weight: 700;
+  text-align: center;
+  margin: 0 0 40px;
+}
+
+/* 히어로 콘텐츠 2컬럼 */
+.hero-content {
+  display: flex;
+  gap: 80px;
+  align-items: stretch;
+  justify-content: space-between;
+}
+
+.hero-text-block {
+  flex: 0 0 420px;
+}
+
+.hero-subheading {
+  font-size: 26px;
+  margin: 0 0 24px;
+}
+
+.hero-description {
+  font-size: 18px;
+  line-height: 1.8;
+  margin: 0;
+}
+
+/* 오른쪽 이미지 박스 */
+.hero-image-placeholder {
+  flex: 0 0 460px;
+  min-height: 420px;
+  background-color: #d9d9d9;
+  border-radius: 8px;
+}
+
+/* 아래 스크롤 영역 */
+.below-section {
+  background-color: #ffffff;
+  padding: 80px 0 160px;
+}
+
+.below-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 40px;
+}
+
+/* 태블릿 */
+@media (max-width: 1024px) {
+  .top-nav-inner {
+    padding: 14px var(--page-padding-tablet);
+  }
+
+  .logo-placeholder {
+    width: 40px;
+    height: 40px;
+  }
+
+  .brand-name {
+    font-size: 20px;
+  }
+
+  .btn-login {
+    padding: 8px 20px;
+    font-size: 14px;
+  }
+
+  .hero-inner {
+    padding: 32px var(--page-padding-tablet) 60px;
+  }
+
+  .hero-content {
+    gap: 40px;
+  }
+
+  .hero-image-placeholder {
+    flex: 0 0 360px;
+  }
+}
+
+/* 모바일 */
+@media (max-width: 768px) {
+  .top-nav-inner {
+    padding: 12px var(--page-padding-mobile);
+  }
+
+  .logo-placeholder {
+    width: 32px;
+    height: 32px;
+  }
+
+  .brand-name {
+    font-size: 18px;
+  }
+
+  .btn-login {
+    padding: 8px 18px;
+    font-size: 14px;
+  }
+
+  .hero {
+    min-height: auto;
+  }
+
+  .hero-inner {
+    padding: 24px var(--page-padding-mobile) 60px;
+  }
+
+  .hero-title {
+    font-size: 30px;
+    margin: 8px 0 28px;
+  }
+
+  .hero-content {
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .hero-text-block {
+    flex: 1 1 auto;
+  }
+
+  .hero-image-placeholder {
+    flex: 1 1 auto;
+    min-height: 260px;
+  }
+}

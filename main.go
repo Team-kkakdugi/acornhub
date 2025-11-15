@@ -9,10 +9,6 @@ import (
 	"net/http"
 )
 
-func handleMainPage(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, "index.html")
-}
-
 func handleMe(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value(userContextKey).(int64)
 	if !ok {
@@ -59,13 +55,18 @@ func main() {
 	}
 	defer db.Close()
 
-	http.HandleFunc("/", handleMainPage)
+	// API 및 인증 핸들러 등록
 	http.HandleFunc("/auth/logout", handleLogout)
 	http.HandleFunc("/auth/github", handleGitHubLogin)
 	http.HandleFunc("/auth/github/callback", handleGitHubCallback)
 	http.HandleFunc("/api/me", authMiddleware(handleMe))
 	http.HandleFunc("/api/projects/", authMiddleware(handleProjects))
 	http.HandleFunc("/api/cards/", authMiddleware(handleCards))
+
+	// 정적 파일 서버 설정
+	// 위에서 등록된 API 경로 외의 모든 요청은 static 디렉토리의 파일을 제공합니다.
+	// 예를 들어, "/" 요청은 "static/index.html"을, "/css/index.css" 요청은 "static/css/index.css" 파일을 반환합니다.
+	http.Handle("/", http.FileServer(http.Dir("./static")))
 
 	fmt.Println("서버가 8080 포트에서 실행 중입니다...")
 	if err := http.ListenAndServe(":8080", nil); err != nil {

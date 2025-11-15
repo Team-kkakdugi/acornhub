@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Acorn Hub - 대시보드</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="css/dashboard.css" />
+  </head>
+  <body>
+    <div class="dashboard-layout">
+      <!-- 사이드바 -->
+      <aside class="sidebar">
+        <div class="sidebar-top">
+          <div class="sidebar-logo">
+            <!-- Acorn Hub 로고 이미지 -->
+            <img
+              src="assets/logo.png"
+              alt="Acorn Hub 로고"
+              class="logo-image"
+            />
+            <div class="logo-text">Acorn Hub</div>
+          </div>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">건우 님의 Acorns</div>
+          <button class="sidebar-item" type="button">
+            <span class="sidebar-item-bullet">●</span>
+            <span class="sidebar-item-label">프로젝트 검색</span>
+          </button>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">개인 페이지</div>
+          <button class="sidebar-item sidebar-item-add" type="button">
+            <span class="sidebar-item-plus">▢</span>
+            <span class="sidebar-item-label">새 페이지 추가</span>
+          </button>
+        </div>
+      </aside>
+
+      <!-- 메인 영역 -->
+      <main class="main">
+        <header class="topbar">
+          <div class="topbar-title">
+            <!-- 대시보드 아이콘 이미지 -->
+            <img
+              src="assets/dashboard.png"
+              alt="대시보드 아이콘"
+              class="topbar-icon-image"
+            />
+            <span>데시보드</span>
+          </div>
+          <button class="btn btn-logout" id="logout-btn" type="button">
+            로그아웃
+          </button>
+        </header>
+
+        <section class="content">
+          <!-- 새 폴더 버튼 1줄 + 그 아래 폴더들이 가로로 배치되는 영역 -->
+          <div class="folder-section">
+            <!-- folder-add 버튼 -->
+            <button
+              class="folder-add-button"
+              id="add-folder-card"
+              type="button"
+            >
+              <img
+                src="assets/folder-add.png"
+                alt="새 폴더 추가"
+                class="folder-image"
+              />
+            </button>
+
+            <!-- 처음에는 비어 있는 폴더 리스트 -->
+            <div class="folder-list" id="folder-list"></div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="js/dashboard.js"></script>
+  </body>
+</html>
