@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="ko">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1" />
+	<title>Testbed - API 테스트</title>
+	<style>
+		body{font-family:system-ui,-apple-system,Segoe UI,Roboto,'Noto Sans',sans-serif;margin:20px}
+		label{display:block;margin-top:10px}
+		input,textarea,button{font-size:14px;padding:6px;margin-top:4px}
+		.row{display:flex;gap:8px;align-items:center}
+		#resp{white-space:pre-wrap;background:#f6f8fa;border:1px solid #e1e4e8;padding:12px;margin-top:12px}
+		.box{border:1px solid #ddd;padding:12px;margin-bottom:12px;border-radius:6px}
+	</style>
+</head>
+<body>
+	<h2>API 테스트베드</h2>
+
+	<div class="box" id="authBox">
+		<strong>인증</strong>
+		<div id="authStatus">로그인 상태 확인 중...</div>
+		<div style="margin-top:8px">
+			<button id="loginBtn">GitHub로 로그인</button>
+			<button id="logoutBtn" style="display:none">로그아웃</button>
+		</div>
+	</div>
+
+	<div class="box">
+		<strong>프로젝트 생성 (POST /api/projects/)</strong>
+		<label>프로젝트 이름</label>
+		<input id="projectname" placeholder="내 프로젝트" style="width:100%" />
+		<label>프로젝트 설명</label>
+		<textarea id="projectdesc" rows="3" style="width:100%">프로젝트 설명입니다.</textarea>
+		<div style="margin-top:8px">
+			<button id="createProjectBtn">생성</button>
+		</div>
+	</div>
+
+	<div class="box">
+		<strong>응답</strong>
+		<div id="resp">응답이 여기 표시됩니다.</div>
+	</div>
+
+	<div class="box" id="projectsBox">
+		<strong>프로젝트 관리</strong>
+		<div style="margin-top:8px">
+			<button id="loadProjectsBtn">프로젝트 목록 불러오기</button>
+		</div>
+		<div id="projectsList" style="margin-top:12px">(목록 없음)</div>
+		<div id="editArea" style="display:none;margin-top:12px">
+			<strong>프로젝트 수정</strong>
+			<input id="editId" type="hidden" />
+			<label>프로젝트 이름</label>
+			<input id="editName" style="width:100%" />
+			<label>프로젝트 설명</label>
+			<textarea id="editDesc" rows="3" style="width:100%"></textarea>
+			<div style="margin-top:8px">
+				<button id="saveEditBtn">저장 (PUT)</button>
+				<button id="cancelEditBtn">취소</button>
+			</div>
+		</div>
+	</div>
+
+	<div class="box" id="cardsBox" style="display:none;">
+		<h3 id="cardsBoxTitle">카드 관리</h3>
+		<div id="createCardArea">
+			<strong>새 카드 생성</strong>
+			<input id="createCardProjectId" type="hidden" />
+			<label>내용 (cardtext)</label>
+			<input id="createCardText" style="width:100%" placeholder="카드 내용" />
+			<label>URL (cardurl)</label>
+			<input id="createCardUrl" style="width:100%" placeholder="https://example.com" />
+			<div style="margin-top:8px">
+				<button id="createCardBtn">생성 (POST)</button>
+			</div>
+		</div>
+		<hr style="margin: 20px 0;">
+		<strong>카드 목록</strong>
+		<div id="cardsList" style="margin-top:12px">(목록 없음)</div>
+		<div id="editCardArea" style="display:none;margin-top:12px">
+			<strong>카드 수정</strong>
+			<input id="editCardId" type="hidden" />
+			<label>내용 (cardtext)</label>
+			<input id="editCardText" style="width:100%" />
+			<label>URL (cardurl)</label>
+			<input id="editCardUrl" style="width:100%" />
+			<label>태그 (cardtags)</label>
+			<input id="editCardTags" style="width:100%" />
+			<div style="margin-top:8px">
+				<button id="saveCardEditBtn">저장 (PUT)</button>
+				<button id="cancelCardEditBtn">취소</button>
+			</div>
+		</div>
+	</div>
+
+
+	<script>
+		function show(respText){
+			document.getElementById('resp').textContent = respText
+		}
+
+		function escapeHtml(s){ if(!s) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }
+
+		// --- 인증 ---
+		async function checkAuth(){
+			try{
+				const res = await fetch('/api/me', {method:'GET', credentials:'same-origin'})
+				if(res.status === 200){
+					const data = await res.json()
+					document.getElementById('authStatus').textContent = '로그인: ' + (data.user_name || data.username || '사용자')
+					document.getElementById('loginBtn').style.display = 'none'
+					document.getElementById('logoutBtn').style.display = 'inline-block'
+				}else{
+					document.getElementById('authStatus').textContent = '로그아웃 상태'
+					document.getElementById('loginBtn').style.display = 'inline-block'
+					document.getElementById('logoutBtn').style.display = 'none'
+				}
+			}catch(err){
+				document.getElementById('authStatus').textContent = '로그인 상태 확인 실패'
+			}
+		}
+		document.getElementById('loginBtn').addEventListener('click', ()=> window.location.href = '/auth/github')
+		document.getElementById('logoutBtn').addEventListener('click', ()=> window.location.href = '/auth/logout')
+
+		// --- 프로젝트 생성 ---
+		document.getElementById('createProjectBtn').addEventListener('click', async () => {
+			const name = document.getElementById('projectname').value
+			const desc = document.getElementById('projectdesc').value
+			if(!name){ show('프로젝트 이름을 입력하세요'); return }
+			
+			show('프로젝트 생성 중...')
+			try {
+				const res = await fetch('/api/projects/', {
+					method: 'POST',
+					headers: {'Content-Type': 'application/json'},
+					credentials: 'same-origin',
+					body: JSON.stringify({projectname: name, projectdesc: desc})
+				})
+				show('HTTP '+res.status+'\n'+await res.text())
+				if(res.ok) {
+					document.getElementById('projectname').value = ''
+					document.getElementById('projectdesc').value = ''
+					loadProjects()
+				}
+			} catch(err) { show('프로젝트 생성 실패: '+err) }
+		})
+
+		// --- 프로젝트 관리 ---
+		async function loadProjects(){
+			show('프로젝트 목록을 불러오는 중...')
+			try{
+				const res = await fetch('/api/projects/', {method:'GET', credentials:'same-origin'})
+				const text = await res.text()
+				let list = []
+				try{ list = JSON.parse(text) } catch(e){ show('목록 파싱 실패: '+e+'\n'+text); return }
+				const container = document.getElementById('projectsList')
+				container.innerHTML = ''
+				if(!Array.isArray(list) || list.length===0){ container.innerText='(생성된 프로젝트 없음)'; show('HTTP '+res.status); return }
+				
+				list.forEach(p=>{
+					const id = p.projectid
+					const name = p.projectname
+					const row = document.createElement('div')
+					row.style.borderTop='1px solid #eee'
+					row.style.padding='8px 0'
+					row.innerHTML = `<strong>${escapeHtml(name)}</strong> <small style="color:#666">(id:${id})</small><div>${escapeHtml(p.projectdesc)}</div>`
+					
+					const btnEdit = document.createElement('button'); btnEdit.textContent='편집'; btnEdit.style.marginRight='6px'
+					btnEdit.addEventListener('click', ()=> openEdit(p))
+					
+					const btnDel = document.createElement('button'); btnDel.textContent='삭제'; btnDel.style.marginRight='6px'
+					btnDel.addEventListener('click', ()=>{ if(confirm('프로젝트를 삭제하시겠습니까? 모든 하위 카드도 삭제됩니다.')) doDelete(id) })
+
+					const btnShowCards = document.createElement('button'); btnShowCards.textContent='카드 보기';
+					btnShowCards.addEventListener('click', ()=> {
+						document.getElementById('cardsBox').style.display = 'block'
+						document.getElementById('cardsBoxTitle').textContent = '\''.concat(escapeHtml(name), '프로젝트 카드 관리')
+						document.getElementById('createCardProjectId').value = id
+						loadCards(id)
+					})
+					
+					row.appendChild(document.createElement('br'))
+					row.appendChild(btnEdit)
+					row.appendChild(btnDel)
+					row.appendChild(btnShowCards)
+					container.appendChild(row)
+				})
+				show('HTTP '+res.status+' 프로젝트 목록 로드 완료')
+			}catch(err){ show('목록 요청 실패: '+err) }
+		}
+
+		function openEdit(p){
+			document.getElementById('editArea').style.display='block'
+			document.getElementById('editId').value = p.projectid
+			document.getElementById('editName').value = p.projectname
+			document.getElementById('editDesc').value = p.projectdesc
+			window.scrollTo(0, document.getElementById('editArea').offsetTop - 20)
+		}
+
+		function closeEdit(){ document.getElementById('editArea').style.display='none' }
+
+		async function doDelete(id){
+			show('삭제 요청 중: id='+id)
+			try{
+				const res = await fetch(`/api/projects/${encodeURIComponent(id)}`, {method:'DELETE', credentials:'same-origin'})
+				show('HTTP '+res.status+'\n'+ await res.text())
+				loadProjects()
+			}catch(err){ show('삭제 실패: '+err) }
+		}
+
+		document.getElementById('loadProjectsBtn').addEventListener('click', loadProjects)
+		document.getElementById('saveEditBtn').addEventListener('click', async ()=>{
+			const id = document.getElementById('editId').value.trim()
+			if(!id){ show('id가 비어있습니다'); return }
+			const body = { projectname: document.getElementById('editName').value, projectdesc: document.getElementById('editDesc').value }
+			try{
+				const res = await fetch(`/api/projects/${encodeURIComponent(id)}`, {method:'PUT', credentials:'same-origin', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)})
+				show('HTTP '+res.status+'\n'+await res.text())
+				closeEdit()
+				loadProjects()
+			}catch(err){ show('수정 실패: '+err) }
+		})
+		document.getElementById('cancelEditBtn').addEventListener('click', closeEdit)
+
+		// --- 카드 관리 ---
+		async function loadCards(projectId){
+			show(`프로젝트(id:${projectId})의 카드를 불러오는 중...`)
+			const container = document.getElementById('cardsList')
+			container.innerHTML = '로딩 중...'
+			try {
+				const res = await fetch(`/api/cards/?project_id=${projectId}`, {method:'GET', credentials:'same-origin'})
+				const text = await res.text()
+				let list = []
+				try{ list = JSON.parse(text) } catch(e){ show('카드 목록 파싱 실패: '+e+'\n'+text); container.innerHTML = '오류'; return }
+
+				container.innerHTML = ''
+				if(!Array.isArray(list) || list.length===0){ container.innerText='(카드 없음)'; show('HTTP '+res.status); return }
+
+				list.forEach(c => {
+					const row = document.createElement('div')
+					row.style.borderTop='1px solid #eee'; row.style.padding='8px 0'
+					row.innerHTML = `
+						<div><strong>Text:</strong> ${escapeHtml(c.cardtext)} <small style="color:#666">(id:${c.id})</small></div>
+						<div><strong>URL:</strong> ${escapeHtml(c.cardurl)}</div>
+						<div><strong>Tags:</strong> ${escapeHtml(c.cardtags)}</div>
+					`
+					const btnEdit = document.createElement('button'); btnEdit.textContent='편집'; btnEdit.style.marginRight='6px'
+					btnEdit.addEventListener('click', ()=> openCardEdit(c))
+
+					const btnDel = document.createElement('button'); btnDel.textContent='삭제'
+					btnDel.addEventListener('click', ()=> { if(confirm('카드를 삭제하시겠습니까?')) doCardDelete(c.id, c.project_id) })
+
+					row.appendChild(document.createElement('br'))
+					row.appendChild(btnEdit)
+					row.appendChild(btnDel)
+					container.appendChild(row)
+				})
+				show(`HTTP ${res.status} 카드 목록 로드 완료`)
+
+			} catch(err) {
+				show('카드 목록 요청 실패: '+err)
+				container.innerHTML = '오류'
+			}
+		}
+
+		document.getElementById('createCardBtn').addEventListener('click', async () => {
+			const projectId = document.getElementById('createCardProjectId').value
+			const text = document.getElementById('createCardText').value
+			const url = document.getElementById('createCardUrl').value
+			if(!projectId || !text) { show('프로젝트 ID와 카드 내용은 필수입니다.'); return }
+
+			const body = { project_id: parseInt(projectId), cardtext: text, cardurl: url, cardtags: "" } // 태그는 비워서 보냄
+			show('카드 생성 중...')
+			try {
+				const res = await fetch('/api/cards/', {method:'POST', credentials:'same-origin', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)})
+				show('HTTP '+res.status+'\n'+await res.text())
+				if(res.ok) {
+					document.getElementById('createCardText').value = ''
+					document.getElementById('createCardUrl').value = ''
+					loadCards(projectId)
+				}
+			} catch(err) { show('카드 생성 실패: '+err) }
+		})
+
+		function openCardEdit(card){
+			document.getElementById('editCardArea').style.display='block'
+			document.getElementById('editCardId').value = card.id
+			document.getElementById('editCardText').value = card.cardtext
+			document.getElementById('editCardUrl').value = card.cardurl
+			document.getElementById('editCardTags').value = card.cardtags
+			window.scrollTo(0, document.getElementById('editCardArea').offsetTop - 20)
+		}
+
+		function closeCardEdit(){ document.getElementById('editCardArea').style.display='none' }
+
+		document.getElementById('cancelCardEditBtn').addEventListener('click', closeCardEdit)
+
+		document.getElementById('saveCardEditBtn').addEventListener('click', async () => {
+			const cardId = document.getElementById('editCardId').value
+			const projectId = document.getElementById('createCardProjectId').value // 현재 컨텍스트의 projectId
+			if(!cardId || !projectId) { show('카드 ID 또는 프로젝트 ID가 없습니다.'); return }
+
+			const body = {
+				cardtext: document.getElementById('editCardText').value,
+				cardurl: document.getElementById('editCardUrl').value,
+				cardtags: document.getElementById('editCardTags').value
+			}
+			show('카드 수정 중...')
+			try {
+				const res = await fetch(`/api/cards/${cardId}`, {method:'PUT', credentials:'same-origin', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)})
+				show('HTTP '+res.status+'\n'+await res.text())
+				if(res.ok) {
+					closeCardEdit()
+					loadCards(projectId)
+				}
+			} catch(err) { show('카드 수정 실패: '+err) }
+		})
+
+		async function doCardDelete(cardId, projectId) {
+			show(`카드(id:${cardId}) 삭제 중...`)
+			try {
+				const res = await fetch(`/api/cards/${cardId}`, {method:'DELETE', credentials:'same-origin'})
+				show('HTTP '+res.status+'\n'+await res.text())
+				if(res.ok) loadCards(projectId)
+			} catch(err) { show('카드 삭제 실패: '+err) }
+		}
+
+		// 초기 상태 체크
+		checkAuth()
+		loadProjects() // 페이지 로드 시 프로젝트 목록 자동 로드
+
+	</script>
+</body>
+</html>

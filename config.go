@@ -26,7 +26,7 @@ func loadConfig() error {
 		ClientID:     os.Getenv("GITHUB_CLIENT_ID"),
 		ClientSecret: os.Getenv("GITHUB_CLIENT_SECRET"),
 		Endpoint:     github.Endpoint,
-		RedirectURL:  "http://localhost:8080/auth/github/callback",
+		RedirectURL:  "https://oli.tailda0655.ts.net/auth/github/callback",
 		Scopes:       []string{"read:user"},
 	}
 	if githubOauthConfig.ClientID == "" {
@@ -54,6 +54,33 @@ func setupDatabase() error {
         username TEXT UNIQUE NOT NULL
     );`
 	if _, err := db.Exec(createUsersTableSQL); err != nil {
+		return err
+	}
+
+	createProjectsTableSQL := `
+	CREATE TABLE IF NOT EXISTS projects (
+		id INTEGER PRIMARY KEY,
+		projectname TEXT UNIQUE NOT NULL,
+		projectdesc TEXT,
+		user_id INTEGER,
+		FOREIGN KEY(user_id) REFERENCES users(id)
+	);`
+	if _, err := db.Exec(createProjectsTableSQL); err != nil {
+		return err
+	}
+
+	createCardsTableSQL := `
+	CREATE TABLE IF NOT EXISTS cards (
+		id INTEGER PRIMARY KEY,
+		cardtext TEXT,
+		cardurl TEXT,
+		cardtags TEXT,
+		project_id INTEGER,
+		user_id INTEGER,
+		FOREIGN KEY(project_id) REFERENCES projects(id),
+		FOREIGN KEY(user_id) REFERENCES users(id)
+	);`
+	if _, err := db.Exec(createCardsTableSQL); err != nil {
 		return err
 	}
 

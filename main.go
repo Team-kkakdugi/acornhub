@@ -2,13 +2,12 @@
 package main
 
 import (
+	"database/sql"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
-	"database/sql"
-	"encoding/json"
 )
-
 
 func handleMainPage(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "index.html")
@@ -27,15 +26,15 @@ func handleMe(w http.ResponseWriter, r *http.Request) {
 		query := `SELECT username FROM users WHERE id = ?;`
 		err := db.QueryRow(query, userID).Scan(&userName)
 		if err != nil {
-            if err == sql.ErrNoRows {
-                w.WriteHeader(http.StatusNotFound)
-                fmt.Fprint(w, "유저 정보가 없습니다.")
-            } else {
-                w.WriteHeader(http.StatusInternalServerError)
-                fmt.Fprint(w, "DB 조회 실패")
-            }
-            return
-        }
+			if err == sql.ErrNoRows {
+				w.WriteHeader(http.StatusNotFound)
+				fmt.Fprint(w, "유저 정보가 없습니다.")
+			} else {
+				w.WriteHeader(http.StatusInternalServerError)
+				fmt.Fprint(w, "DB 조회 실패")
+			}
+			return
+		}
 
 		respData := struct {
 			Username string `json:"user_name"`
@@ -46,7 +45,7 @@ func handleMe(w http.ResponseWriter, r *http.Request) {
 		jsonData, err := json.Marshal(respData)
 		if err != nil {
 			http.Error(w, "JSON 인코딩 실패", http.StatusInternalServerError)
-            return
+			return
 		}
 
 		w.Header().Set("Content-Type", "application/json")
@@ -60,11 +59,13 @@ func main() {
 	}
 	defer db.Close()
 
-	http.HandleFunc("/", handleMainPage) 
+	http.HandleFunc("/", handleMainPage)
 	http.HandleFunc("/auth/logout", handleLogout)
 	http.HandleFunc("/auth/github", handleGitHubLogin)
 	http.HandleFunc("/auth/github/callback", handleGitHubCallback)
 	http.HandleFunc("/api/me", authMiddleware(handleMe))
+	http.HandleFunc("/api/projects/", authMiddleware(handleProjects))
+	http.HandleFunc("/api/cards/", authMiddleware(handleCards))
 
 	fmt.Println("서버가 8080 포트에서 실행 중입니다...")
 	if err := http.ListenAndServe(":8080", nil); err != nil {
