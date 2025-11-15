@@ -15,17 +15,67 @@ body {
 .dashboard-layout {
   display: flex;
   min-height: 100vh;
+  position: relative;
 }
 
 /* 사이드바 */
 
 .sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 100vh;
   width: 230px;
   background: #fafafa;
   border-right: 1px solid #e5e5e5;
   padding: 16px 12px;
   display: flex;
   flex-direction: column;
+  transition: transform 0.3s ease;
+  z-index: 1000;
+}
+
+.sidebar.collapsed {
+  transform: translateX(-230px);
+}
+
+/* 사이드바 토글 버튼 */
+.sidebar-toggle {
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  color: #374151;
+  transition: all 0.3s ease;
+  z-index: 100;
+}
+
+.sidebar-toggle:hover {
+  background: #e5e7eb;
+}
+
+/* 사이드바가 닫혔을 때 토글 버튼을 밖으로 */
+.sidebar.collapsed .sidebar-toggle {
+  right: -40px;
+  background: #fafafa;
+  border: 1px solid #e5e5e5;
+  border-left: none;
+  border-radius: 0 8px 8px 0;
+  width: 40px;
+  height: 40px;
+}
+
+.sidebar.collapsed .sidebar-toggle:hover {
+  background: #f0f0f0;
 }
 
 .sidebar-top {
@@ -124,6 +174,16 @@ body {
   text-align: left;
   cursor: pointer;
   color: #4b5563;
+  position: relative;
+  padding-left: 12px;
+}
+
+.sidebar-project-item::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  color: #4b5563;
+  font-size: 1rem;
 }
 
 .sidebar-project-item:hover {
@@ -142,18 +202,18 @@ body {
   padding: 10px 0;
   border-radius: 8px;
   border: none;
-  background: #A08060;
+  background: #408007;
   color: #FEFEFE;
   font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 6px rgba(139, 111, 71, 0.15);
+  box-shadow: 0 2px 6px rgba(64, 128, 7, 0.15);
 }
 
 .sidebar-logout-btn:hover {
-  background: #8B6F47;
-  box-shadow: 0 4px 10px rgba(139, 111, 71, 0.25);
+  background: #356906;
+  box-shadow: 0 4px 10px rgba(64, 128, 7, 0.25);
   transform: translateY(-1px);
 }
 
@@ -164,6 +224,14 @@ body {
   display: flex;
   flex-direction: column;
   background: #ffffff;
+  transition: margin-left 0.3s ease;
+  margin-left: 230px;
+  width: 100%;
+}
+
+/* 사이드바가 닫혔을 때 메인 영역이 전체를 차지 */
+.sidebar.collapsed ~ .main {
+  margin-left: 0;
 }
 
 /* 상단 바 */
@@ -183,6 +251,7 @@ body {
   gap: 8px;
   font-size: 1.1rem;
   font-weight: 700;
+  margin-left: 3%;
 }
 
 /* 상단 검색창 */
@@ -209,28 +278,28 @@ body {
 
 .content {
   flex: 1;
-  padding: 32px 60px;
+  padding: 32px 18%;
 }
 
 /* 새 폴더 버튼 1줄 + 그 아래 폴더들이 가로로 배치되는 영역 */
 
 .folder-section {
   display: flex;
-  flex-direction: column;
-  gap: 24px;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 40px;
 }
 
 /* 새 폴더 추가 버튼 - CSS로 폴더 모양 만들기 */
 
 .folder-add-button {
-  background: rgba(235, 216, 179, 1);
+  background: #F5F1EE;
   border: none;
   padding: 0;
   cursor: pointer;
-  align-self: flex-start;
   width: 200px;
   height: 160px;
-  border-radius: 12px;
+  border-radius: 5px;
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -239,6 +308,7 @@ body {
   position: relative;
   box-shadow: 0 2px 8px rgba(139, 111, 71, 0.15);
   transition: all 0.3s ease;
+  order: 9999;
 }
 
 .folder-add-button:hover {
@@ -248,13 +318,13 @@ body {
 
 .folder-add-text {
   font-size: 1.1rem;
-  color: #8B6F47;
+  color: #93724D;
   font-weight: 600;
 }
 
 .folder-add-icon {
   font-size: 3rem;
-  color: #8B6F47;
+  color: #93724D;
   font-weight: 300;
   line-height: 1;
 }
@@ -262,9 +332,7 @@ body {
 /* 폴더들이 생기는 영역 (아래 줄) */
 
 .folder-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 40px;
+  display: contents;
 }
 
 /* 폴더 카드 */
@@ -284,9 +352,9 @@ body {
 .folder-image {
   width: 200px;
   height: 160px;
-  background: linear-gradient(to bottom, rgba(235, 216, 179, 1) 0%, rgba(235, 216, 179, 1) 75%, #A08060 75%, #A08060 100%);
+  background: linear-gradient(to bottom, #F5F1EE 0%, #F5F1EE 75%, #93724D 75%, #93724D 100%);
   border: none;
-  border-radius: 12px;
+  border-radius: 5px;
   box-shadow: 0 2px 8px rgba(139, 111, 71, 0.15);
   display: flex;
   align-items: center;

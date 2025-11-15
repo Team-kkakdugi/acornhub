@@ -10,7 +10,12 @@
   <body>
     <div class="dashboard-layout">
       <!-- 사이드바 -->
-      <aside class="sidebar">
+      <aside class="sidebar" id="sidebar">
+        <!-- 사이드바 토글 버튼 -->
+        <button class="sidebar-toggle" id="sidebar-toggle">
+          ‹
+        </button>
+        
         <div class="sidebar-top">
           <div class="sidebar-logo">
             <!-- Acorn Hub 로고 이미지 -->
@@ -27,10 +32,6 @@
           <div class="sidebar-section-title">
             <span id="user-name-label"></span> 님의 <span class="acorns-highlight">Acorns</span>
           </div>
-          <button class="sidebar-item" type="button" id="sidebar-search-btn">
-            <span class="sidebar-item-bullet">●</span>
-            <span class="sidebar-item-label">프로젝트 검색</span>
-          </button>
         </div>
 
         <!-- 개인 페이지 텍스트 제거, 새 페이지 추가만 + 아이콘 -->
@@ -80,7 +81,10 @@
         <section class="content">
           <!-- 새 폴더 버튼 1줄 + 그 아래 폴더들이 가로로 배치되는 영역 -->
           <div class="folder-section">
-            <!-- folder-add 버튼 -->
+            <!-- 프로젝트들이 여기에 동적으로 추가됨 -->
+            <div class="folder-list" id="folder-list"></div>
+            
+            <!-- folder-add 버튼은 order: 9999로 항상 맨 뒤에 위치 -->
             <button
               class="folder-add-button"
               id="add-folder-card"
@@ -89,9 +93,6 @@
               <span class="folder-add-text">새 프로젝트</span>
               <div class="folder-add-icon">+</div>
             </button>
-
-            <!-- 처음에는 비어 있는 폴더 리스트 -->
-            <div class="folder-list" id="folder-list"></div>
           </div>
         </section>
       </main>

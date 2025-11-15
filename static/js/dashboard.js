@@ -3,7 +3,7 @@
 // 실제 백엔드 주소
 const API_BASE_URL = "https://oli.tailda0655.ts.net";
 const PROJECT_LIST_URL = `${API_BASE_URL}/api/projects/`;   // 목록/생성 (슬래시 추가)
-const PROJECT_DELETE_URL = `${API_BASE_URL}/api/project/`;  // 삭제 (슬래시 추가)
+const PROJECT_DELETE_URL = `${API_BASE_URL}/api/projects/`;  // 삭제 (URL에 ID 추가 필요)
 const PROJECT_SEARCH_URL = `${API_BASE_URL}/api/projects/`; // 검색 (슬래시 추가)
 const LOGOUT_URL = `${API_BASE_URL}/auth/logout`;
 const ME_URL = `${API_BASE_URL}/api/me`;
@@ -13,9 +13,10 @@ const addFolderCard = document.getElementById("add-folder-card");
 const folderList = document.getElementById("folder-list");
 
 // 사이드바 요소
+const sidebar = document.getElementById("sidebar");
+const sidebarToggle = document.getElementById("sidebar-toggle");
 const sidebarProjectList = document.getElementById("sidebar-project-list");
 const addPageBtn = document.getElementById("add-page-btn");
-const sidebarSearchBtn = document.getElementById("sidebar-search-btn");
 const userNameLabel = document.getElementById("user-name-label");
 
 // 상단 검색창
@@ -23,6 +24,20 @@ const searchInput = document.getElementById("project-search-input");
 
 // 프론트에서 들고 있을 프로젝트 목록
 let projects = [];
+
+/* ---------------- 사이드바 토글 ---------------- */
+
+if (sidebarToggle && sidebar) {
+  sidebarToggle.addEventListener("click", () => {
+    sidebar.classList.toggle("collapsed");
+    // 아이콘 변경
+    if (sidebar.classList.contains("collapsed")) {
+      sidebarToggle.textContent = "›";
+    } else {
+      sidebarToggle.textContent = "‹";
+    }
+  });
+}
 
 /* ---------------- 유저 이름 불러오기 ---------------- */
 
@@ -383,15 +398,16 @@ async function handleDeleteProject(project) {
   if (!ok) return;
 
   try {
-    // API 명세서: DELETE /api/project, body에 id 포함
-    const res = await fetch(PROJECT_DELETE_URL, {
+    // API 명세서: DELETE /api/projects/{id}
+    const deleteUrl = `${PROJECT_DELETE_URL}${project.projectid}`;
+    console.log("삭제 요청 URL:", deleteUrl);
+    
+    const res = await fetch(deleteUrl, {
       method: "DELETE",
       credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ id: project.projectid }),
     });
+
+    console.log("삭제 응답 Status:", res.status);
 
     if (res.status === 401) {
       window.location.href = "/index.html";
@@ -400,7 +416,7 @@ async function handleDeleteProject(project) {
 
     if (!res.ok) {
       const text = await res.text();
-      console.error("[DELETE /api/project] error:", text);
+      console.error("[DELETE /api/projects/{id}] error:", text);
       alert("프로젝트 삭제 실패\n" + text);
       return;
     }
@@ -409,6 +425,7 @@ async function handleDeleteProject(project) {
     projects = projects.filter((p) => p.projectid !== project.projectid);
     renderProjects();
     renderSidebarProjects();
+    console.log("프로젝트 삭제 완료:", project.projectname);
   } catch (err) {
     console.error(err);
     alert("프로젝트를 삭제하는 중 오류가 발생했어요.");
@@ -434,12 +451,6 @@ document.addEventListener("DOMContentLoaded", () => {
       if (e.key === "Enter") {
         searchProjects(searchInput.value);
       }
-    });
-  }
-
-  if (sidebarSearchBtn && searchInput) {
-    sidebarSearchBtn.addEventListener("click", () => {
-      searchInput.focus();
     });
   }
 });

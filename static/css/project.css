@@ -65,9 +65,6 @@ html {
 }
 
 .card {
-  display: flex;
-  flex-direction: column;
-  height: 220px; /* 고정 높이 설정 */
   background-color: var(--card-bg);
   border: 1px solid var(--border-color);
   border-radius: 12px;
@@ -75,10 +72,7 @@ html {
   box-shadow: var(--card-shadow);
   transition: box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out;
 }
-.card:not(.card-add) {
-  cursor: pointer;
-}
-.card:not(.card-add):hover {
+.card:hover {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   transform: translateY(-3px);
 }
@@ -101,17 +95,9 @@ html {
 }
 
 .card-text {
-  flex-grow: 1; /* 남은 공간을 모두 차지하도록 설정 */
   font-size: 0.95rem;
   line-height: 1.6;
   color: var(--text-light);
-  overflow: hidden; /* 내용이 넘칠 경우 숨김 */
-  text-overflow: ellipsis; /* ... 효과 */
-  
-  /* 여러 줄 줄임표 (웹킷 브라우저용) */
-  display: -webkit-box;
-  -webkit-line-clamp: 4; /* 보여줄 줄 수 */
-  -webkit-box-orient: vertical;
 }
 
 /* Sidebar */
@@ -185,6 +171,9 @@ html {
   transition: background-color 0.2s;
 }
 .document-list-item:hover {
+  background-color: #f4eee9;
+}
+.document-list-item.active {
   background-color: var(--accent-green-light);
   border-color: #dce5dd;
 }
@@ -193,8 +182,12 @@ html {
   flex-grow: 1;
   color: var(--text-light);
 }
-.document-list-item:hover .document-title {
+.document-list-item.active .document-title {
   color: var(--accent-green);
+  font-weight: 600;
+}
+.document-list-item:hover .document-title {
+  color: var(--text-color);
 }
 
 .btn-delete-doc {
@@ -253,6 +246,13 @@ html {
   line-height: 1.7;
 }
 .document-content h2 {
+  margin-top: 0;
+  font-size: 1.8rem;
+  color: var(--text-color);
+}
+.document-content p {
+  color: var(--text-light);
+}document-content h2 {
   margin-top: 0;
   font-size: 1.8rem;
   color: var(--text-color);

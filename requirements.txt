@@ -1,0 +1,12 @@
+fastapi
+uvicorn[standard]
+python-dotenv
+google-generativeai
+scikit-learn
+numpy
+matplotlib
+konlpy
+keybert
+torch
+transformers
+sentencepiece

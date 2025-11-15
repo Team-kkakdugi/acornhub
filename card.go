@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"net/http"
 	"strconv"
@@ -68,14 +69,27 @@ func createCard(w http.ResponseWriter, r *http.Request, userID int64) {
 		return
 	}
 
-	// 태그가 비어있을 경우, 카드 내용에서 자동 생성
+	// 태그가 비어있을 경우, AI 서버를 호출하여 자동 생성
 	if card.Tags == "" && card.Text != "" {
-		words := strings.Fields(card.Text)
-		maxTags := 3
-		if len(words) < maxTags {
-			maxTags = len(words)
+		// AI 서버에 보낼 요청 본문 생성
+		reqBody := map[string]string{"content": card.Text}
+		reqBytes, err := json.Marshal(reqBody)
+		if err == nil {
+			// AI 서버에 POST 요청
+			resp, err := http.Post("http://127.0.0.1:8000/tags/generate", "application/json", bytes.NewBuffer(reqBytes))
+			if err == nil {
+				defer resp.Body.Close()
+				if resp.StatusCode == http.StatusOK {
+					var tagResp struct {
+						Tags []string `json:"tags"`
+					}
+					if err := json.NewDecoder(resp.Body).Decode(&tagResp); err == nil {
+						card.Tags = strings.Join(tagResp.Tags, ",")
+					}
+				}
+			}
 		}
-		card.Tags = strings.Join(words[:maxTags], ",")
+		// 프로토타입 단계에서는 AI 태그 생성 실패가 카드 생성 자체를 막지 않도록 함
 	}
 
 	result, err := db.Exec(
