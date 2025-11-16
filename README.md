@@ -148,7 +148,7 @@ Acorn Hub는 3가지 핵심 AI 기능을 제공합니다.
 6.  **[Go] DB 저장**: `createDocumentWithAI` 핸들러는 받은 HTML 콘텐츠를 `documents` 테이블의 `content` 필드에 저장합니다.
 7.  **[Go → Frontend] 최종 응답**: 새로 생성된 문서의 전체 정보(ID, 제목, AI 생성 콘텐츠 등)를 프런트엔드에 반환합니다. 프런트엔드는 이 정보를 받아 문서 목록을 업데이트하고, 방금 생성된 문서의 상세 뷰를 즉시 표시합니다.
 
-## 4. 실행 방법 (How to Run)
+## 4. 실행 방법
 
 이 프로젝트를 로컬 환경에서 실행하려면 Go와 Python 실행 환경이 필요하며, 두 개의 서버를 동시에 실행해야 합니다.
 
@@ -193,7 +193,7 @@ Acorn Hub는 3가지 핵심 AI 기능을 제공합니다.
 
 3.  **AI 서버 시작**:
     ```bash
-    python ai_server.py
+    uvicorn ai_server:app --reload
     ```
     서버가 시작되면 `http://127.0.0.1:8000`에서 실행됩니다.
 
