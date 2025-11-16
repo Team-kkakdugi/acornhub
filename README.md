@@ -147,3 +147,70 @@ Acorn Hub는 3가지 핵심 AI 기능을 제공합니다.
 5.  **[AI Server → Go] 응답**: Go 백엔드는 AI 에이전트가 생성한 HTML 형식의 보고서 초안을 받습니다.
 6.  **[Go] DB 저장**: `createDocumentWithAI` 핸들러는 받은 HTML 콘텐츠를 `documents` 테이블의 `content` 필드에 저장합니다.
 7.  **[Go → Frontend] 최종 응답**: 새로 생성된 문서의 전체 정보(ID, 제목, AI 생성 콘텐츠 등)를 프런트엔드에 반환합니다. 프런트엔드는 이 정보를 받아 문서 목록을 업데이트하고, 방금 생성된 문서의 상세 뷰를 즉시 표시합니다.
+
+## 4. 실행 방법 (How to Run)
+
+이 프로젝트를 로컬 환경에서 실행하려면 Go와 Python 실행 환경이 필요하며, 두 개의 서버를 동시에 실행해야 합니다.
+
+### 4.1. 사전 준비
+
+1.  **Go 설치**: Go 1.22 이상 버전을 설치합니다.
+2.  **Python 설치**: Python 3.11 이상 버전을 설치하고 `pip`와 `venv`를 사용할 수 있도록 설정합니다.
+3.  **환경 변수 설정**:
+    -   프로젝트 루트 디렉터리에 `.env` 파일을 생성합니다.
+    -   아래 내용을 참고하여 파일에 키를 추가합니다. GitHub OAuth App과 각 AI 서비스에서 API 키를 발급받아야 합니다.
+
+    ```env
+    # GitHub OAuth Application credentials
+    GITHUB_CLIENT_ID=your_github_client_id
+    GITHUB_CLIENT_SECRET=your_github_client_secret
+
+    # JWT secret key (any random string)
+    JWT_SECRET_KEY=your_super_secret_key
+
+    # AI Service API Keys
+    GEMINI_API_KEY=your_google_gemini_api_key
+    ANTHROPIC_API_KEY=your_anthropic_claude_api_key
+    ```
+
+### 4.2. 서버 실행
+
+두 개의 터미널을 열고 각각 다음 단계를 진행합니다.
+
+#### 터미널 1: Python AI 서버 실행
+
+1.  **가상 환경 생성 및 활성화**:
+    ```bash
+    python -m venv .venv
+    source .venv/bin/activate  # macOS/Linux
+    # .\.venv\Scripts\activate  # Windows
+    ```
+
+2.  **Python 의존성 설치**:
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+3.  **AI 서버 시작**:
+    ```bash
+    python ai_server.py
+    ```
+    서버가 시작되면 `http://127.0.0.1:8000`에서 실행됩니다.
+
+#### 터미널 2: Go 백엔드 서버 실행
+
+1.  **Go 의존성 설치** (최초 실행 시 또는 `go.mod` 변경 시):
+    ```bash
+    go mod tidy
+    ```
+
+2.  **Go 백엔드 서버 시작**:
+    ```bash
+    go run .
+    ```
+    서버가 시작되면 `http://localhost:8080`에서 실행됩니다.
+
+### 4.3. 애플리케이션 접속
+
+-   웹 브라우저를 열고 `http://localhost:8080`으로 접속하여 Acorn Hub를 사용할 수 있습니다.
+-   **참고**: GitHub OAuth App 설정에서 "Authorization callback URL"을 `https://oli.tailda0655.ts.net/auth/github/callback`과 같이 실제 배포된 URL(또는 로컬 테스트용 URL)로 정확하게 설정해야 로그인이 정상적으로 동작합니다. 로컬에서만 테스트하는 경우, `http://localhost:8080/auth/github/callback`으로 설정하고 `config.go` 파일의 `RedirectURL`도 동일하게 수정해야 합니다.
